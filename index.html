@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRR Dynamic Scheduler | Advanced Staffing</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">MRR Scheduler</h1>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Dynamic Staffing Dashboard</p>
+            </div>
+            <div class="sidebar-content" id="sidebar-roster">
+                <div style="text-align: center; padding: 40px 0;">
+                    <i data-lucide="users"
+                        style="width: 48px; height: 48px; color: var(--border); margin-bottom: 12px;"></i>
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Upload CSVs to see staff roster</p>
+                </div>
+            </div>
+            <div style="padding: 24px; border-top: 1px solid var(--border);">
+                <div id="gap-indicators" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-nav">
+                <div style="display: flex; gap: 16px;">
+                    <button class="btn btn-ghost" onclick="toggleTheme()" title="Toggle Theme">
+                        <i data-lucide="sun" id="theme-icon"></i>
+                    </button>
+                    <button class="btn btn-ghost" onclick="undo()" title="Undo action">
+                        <i data-lucide="undo-2"></i>
+                        <span>Undo</span>
+                    </button>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-ghost" onclick="openSwapModal()">
+                        <i data-lucide="arrow-left-right"></i>
+                        <span>Swap Staff</span>
+                    </button>
+                    <button class="btn btn-ghost" onclick="toggleHeatmap()">
+                        <i data-lucide="flame"></i>
+                        <span>Heatmap</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportHTML()">
+                        <i data-lucide="download"></i>
+                        <span>Export Schedule</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-body" id="app-body">
+                <!-- Landing State: Options -->
+                <div id="landing-stage" class="animate-fade-in" style="max-width: 800px; margin: 40px auto;">
+                    <div style="text-align: center; margin-bottom: 40px;">
+                        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--text); margin-bottom: 12px;">
+                            Welcome to MRR Scheduler</h1>
+                        <p style="color: var(--text-muted); font-size: 1.1rem;">Choose how you'd like to begin your
+                            scheduling session</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+                        <!-- Option 1: 3 CSVs -->
+                        <div class="glass-card option-card" onclick="showTripleUpload()"
+                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px;">
+                            <div
+                                style="width: 64px; height: 64px; background: var(--primary)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                                <i data-lucide="files" style="width: 32px; height: 32px; color: var(--primary);"></i>
+                            </div>
+                            <h3 style="margin-bottom: 12px;">Upload 3 CSVs</h3>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Standard mode using
+                                people, mrr, and teaching files.</p>
+                        </div>
+
+                        <!-- Option 2: Start from Scratch -->
+                        <div class="glass-card option-card" onclick="startManual()"
+                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px;">
+                            <div
+                                style="width: 64px; height: 64px; background: var(--accent)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                                <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--accent);"></i>
+                            </div>
+                            <h3 style="margin-bottom: 12px;">Start from Scratch</h3>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Begin with a clean slate
+                                and enter staff details manually.</p>
+                        </div>
+
+                        <!-- Option 3: Single File -->
+                        <div class="glass-card option-card" onclick="showSingleUpload()"
+                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px;">
+                            <div
+                                style="width: 64px; height: 64px; background: var(--success)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                                <i data-lucide="file-up" style="width: 32px; height: 32px; color: var(--success);"></i>
+                            </div>
+                            <h3 style="margin-bottom: 12px;">Single File Upload</h3>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Upload a previously saved
+                                or sample-formatted input file.</p>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 40px;">
+                        <button class="btn btn-ghost" onclick="downloadSample()" style="gap: 12px; padding: 12px 24px;">
+                            <i data-lucide="download-cloud"></i>
+                            <span>Download Sample Input Format</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Triple Upload Stage -->
+                <div id="upload-stage" class="hidden animate-fade-in"
+                    style="display: none; max-width: 600px; margin: 40px auto;">
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                            <button class="btn btn-ghost" onclick="backToLanding()">
+                                <i data-lucide="arrow-left"></i>
+                            </button>
+                            <h2>Upload Required CSVs</h2>
+                        </div>
+                        <div class="upload-zone" id="dropzone">
+                            <i data-lucide="upload-cloud"
+                                style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 16px;"></i>
+                            <p style="font-weight: 600;">Click or drag to upload required CSVs</p>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 8px;">
+                                Required: people.csv, mrr.csv, teaching.csv
+                            </p>
+                            <input type="file" id="file-input" multiple accept=".csv" style="display: none;">
+                        </div>
+                        <div id="file-list" style="margin-top: 24px; display: flex; flex-direction: column; gap: 8px;">
+                        </div>
+                        <button class="btn btn-primary" id="start-btn"
+                            style="width: 100%; margin-top: 24px; justify-content: center;" disabled>
+                            Generate Preview
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Single Upload Stage -->
+                <div id="single-upload-stage" class="hidden animate-fade-in"
+                    style="display: none; max-width: 600px; margin: 40px auto;">
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                            <button class="btn btn-ghost" onclick="backToLanding()">
+                                <i data-lucide="arrow-left"></i>
+                            </button>
+                            <h2>Upload Single Input File</h2>
+                        </div>
+                        <div class="upload-zone" id="single-dropzone"
+                            onclick="document.getElementById('single-file-input').click()">
+                            <i data-lucide="file-text"
+                                style="width: 48px; height: 48px; color: var(--success); margin-bottom: 16px;"></i>
+                            <p style="font-weight: 600;">Click or drag to upload input.csv</p>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 8px;">
+                                Previously downloaded sample or saved schedule data
+                            </p>
+                            <input type="file" id="single-file-input" accept=".csv" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview State -->
+                <div id="preview-stage" class="hidden animate-fade-in"
+                    style="display: none; max-width: 800px; margin: 40px auto;">
+                    <div class="glass-card">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <h2>Data Preview</h2>
+                                <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.8rem;"
+                                    onclick="addInstructorUI()">
+                                    <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
+                                    <span>Add Staff</span>
+                                </button>
+                            </div>
+                            <button class="btn btn-ghost" onclick="backToLanding()">
+                                <i data-lucide="arrow-left"></i>
+                                Back
+                            </button>
+                        </div>
+                        <p style="margin-bottom: 20px; color: var(--text-muted);">
+                            Please verify the extracted instructor data before generating the schedule.
+                        </p>
+                        <div id="preview-list"
+                            style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; padding-right: 8px;">
+                            <!-- Preview items will be injected here -->
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn btn-ghost" onclick="downloadSample()"
+                                style="flex: 1; justify-content: center;">
+                                <i data-lucide="download"></i>
+                                Save This Data
+                            </button>
+                            <button class="btn btn-primary" id="make-schedule-btn"
+                                style="flex: 2; justify-content: center; height: 48px; font-size: 1.1rem;">
+                                <i data-lucide="calendar"></i>
+                                Make Schedule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule State -->
+                <div id="schedule-stage" class="hidden animate-fade-in" style="display: none;">
+                    <div id="schedule-alerts"
+                        style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;"></div>
+                    <div class="schedule-grid" id="main-grid">
+                        <!-- Grid will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Swap Staff Modal -->
+                <div id="swap-modal" class="hidden"
+                    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                    <div class="glass-card animate-fade-in"
+                        style="width: 100%; max-width: 500px; padding: 24px; position: relative;">
+                        <button class="btn btn-ghost" onclick="closeSwapModal()"
+                            style="position: absolute; top: 16px; right: 16px; padding: 4px;">
+                            <i data-lucide="x"></i>
+                        </button>
+                        <h2 style="margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="arrow-left-right" style="color: var(--primary);"></i>
+                            Manual Swap
+                        </h2>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <!-- Staff A -->
+                            <div
+                                style="background: var(--background); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                                <label
+                                    style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">STAFF
+                                    A</label>
+                                <select id="swap-staff-a" onchange="populateSwapSlots('a')"
+                                    style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text);"></select>
+                                <select id="swap-slot-a"
+                                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text);">
+                                    <option value="">Select assignment to swap...</option>
+                                </select>
+                            </div>
+
+                            <div style="text-align: center; color: var(--text-muted);">
+                                <i data-lucide="arrow-down-up" style="width: 20px; height: 20px;"></i>
+                            </div>
+
+                            <!-- Staff B -->
+                            <div
+                                style="background: var(--background); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                                <label
+                                    style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">STAFF
+                                    B</label>
+                                <select id="swap-staff-b" onchange="populateSwapSlots('b')"
+                                    style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text);"></select>
+                                <select id="swap-slot-b"
+                                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text);">
+                                    <option value="">Select assignment to swap...</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="executeManualSwap()"
+                                style="width: 100%; justify-content: center; margin-top: 8px;">
+                                Confirm Swap
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // UI Handler integration for app.js
+        const files = { people: null, mrr: null, teaching: null };
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const startBtn = document.getElementById('start-btn');
+        const makeScheduleBtn = document.getElementById('make-schedule-btn');
+
+        lucide.createIcons();
+
+        // --- Navigation ---
+        function showTripleUpload() {
+            document.getElementById('landing-stage').style.display = 'none';
+            document.getElementById('upload-stage').style.display = 'block';
+        }
+
+        function showSingleUpload() {
+            document.getElementById('landing-stage').style.display = 'none';
+            document.getElementById('single-upload-stage').style.display = 'block';
+        }
+
+        function backToLanding() {
+            document.getElementById('landing-stage').style.display = 'block';
+            document.getElementById('upload-stage').style.display = 'none';
+            document.getElementById('single-upload-stage').style.display = 'none';
+            document.getElementById('preview-stage').style.display = 'none';
+        }
+
+        function startManual() {
+            window.scheduler.startFromEmpty();
+        }
+
+        function backToUpload() {
+            backToLanding();
+        }
+
+        // --- File Upload Logic ---
+        if (dropzone) {
+            dropzone.onclick = () => fileInput.click();
+            fileInput.onchange = (e) => handleFiles(e.target.files);
+            dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
+            dropzone.ondragleave = () => dropzone.classList.remove('dragover');
+            dropzone.ondrop = (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            };
+        }
+
+        // Single file upload logic
+        const singleFileInput = document.getElementById('single-file-input');
+        if (singleFileInput) {
+            singleFileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    Papa.parse(file, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            window.scheduler.processSingleFile(results.data);
+                        }
+                    });
+                }
+            };
+        }
+
+        // Drag and drop for single file
+        const singleDropzone = document.getElementById('single-dropzone');
+        if (singleDropzone) {
+            singleDropzone.ondragover = (e) => { e.preventDefault(); singleDropzone.classList.add('dragover'); };
+            singleDropzone.ondragleave = () => singleDropzone.classList.remove('dragover');
+            singleDropzone.ondrop = (e) => {
+                e.preventDefault();
+                singleDropzone.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    Papa.parse(file, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            window.scheduler.processSingleFile(results.data);
+                        }
+                    });
+                }
+            };
+        }
+
+        function handleFiles(fileList) {
+            Array.from(fileList).forEach(file => {
+                if (file.name.includes('people')) files.people = file;
+                if (file.name.includes('mrr')) files.mrr = file;
+                if (file.name.includes('teaching')) files.teaching = file;
+            });
+            updateFileList();
+        }
+
+        function updateFileList() {
+            const list = document.getElementById('file-list');
+            if (!list) return;
+            list.innerHTML = '';
+            Object.entries(files).forEach(([type, file]) => {
+                const item = document.createElement('div');
+                item.className = 'btn btn-ghost';
+                item.style.width = '100%';
+                item.style.justifyContent = 'flex-start';
+                item.innerHTML = `<i data-lucide="${file ? 'check-circle' : 'circle'}" style="color: ${file ? 'var(--success)' : 'var(--border)'}"></i> ${type}.csv ${file ? '- ' + file.name : '(missing)'}`;
+                list.appendChild(item);
+            });
+            lucide.createIcons();
+            startBtn.disabled = !(files.people && files.mrr && files.teaching);
+        }
+
+        if (startBtn) {
+            startBtn.onclick = async () => {
+                const parse = (file, hasHeader = true) => new Promise(res => Papa.parse(file, { header: hasHeader, skipEmptyLines: true, complete: res }));
+                const [p, m, t] = await Promise.all([
+                    parse(files.people),
+                    parse(files.mrr),
+                    parse(files.teaching, false) // teaching.csv HAS NO HEADERS
+                ]);
+
+                window.scheduler.processFiles(p.data, m.data, t.data);
+            };
+        }
+
+        if (makeScheduleBtn) {
+            makeScheduleBtn.onclick = () => {
+                document.getElementById('preview-stage').style.display = 'none';
+                document.getElementById('schedule-stage').style.display = 'block';
+                window.scheduler.runScheduler();
+            };
+        }
+
+        function downloadSample() {
+            const content = window.scheduler.generateCSV();
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "mrr_scheduler_input.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- Preview Logic ---
+        window.scheduler.onPreview = (state) => {
+            document.getElementById('upload-stage').style.display = 'none';
+            document.getElementById('landing-stage').style.display = 'none';
+            document.getElementById('single-upload-stage').style.display = 'none';
+            document.getElementById('preview-stage').style.display = 'block';
+
+            const list = document.getElementById('preview-list');
+            list.innerHTML = state.instructors.map((inst, idx) => `
+                <div class="preview-item" style="background: var(--background); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input type="text" value="${inst.name}" id="inst-name-${idx}"
+                               style="background: transparent; border: none; font-weight: 800; font-size: 1rem; color: var(--text); border-bottom: 2px solid transparent; flex: 1; transition: border-color 0.2s;"
+                               onfocus="this.style.borderColor='var(--primary)'" 
+                               onblur="this.style.borderColor='transparent'" 
+                               oninput="window.scheduler.updateInstructor(${idx}, 'name', this.value)"
+                               title="Click to edit Name">
+                        
+                        <div style="display: flex; align-items: center; gap: 4px; background: ${inst.isMRR ? 'var(--success)' : 'var(--accent)'}22; padding: 4px 10px; border-radius: 6px;">
+                            <i data-lucide="${inst.isMRR ? 'shield' : 'book-open'}" style="width: 14px; height: 14px; color: ${inst.isMRR ? 'var(--success)' : 'var(--accent)'};"></i>
+                            <input type="text" value="${inst.course}" 
+                                   style="background: transparent; border: none; font-size: 0.8rem; font-weight: 800; color: ${inst.isMRR ? 'var(--success)' : 'var(--accent)'}; width: 85px; text-transform: uppercase;"
+                                   oninput="window.scheduler.updateInstructor(${idx}, 'course', this.value)"
+                                   title="Edit Course">
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 4px; font-size: 0.85rem; color: var(--text-muted);">
+                            <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                            <input type="number" value="${inst.required}" 
+                                   style="background: transparent; border: none; font-size: 0.85rem; width: 35px; color: var(--text-muted); font-weight: 600;"
+                                   oninput="window.scheduler.updateInstructor(${idx}, 'required', this.value)"
+                                   title="Edit Required Hours">
+                            <span>hrs</span>
+                        </div>
+
+                        <button class="btn btn-ghost" style="padding: 4px; color: var(--danger);" onclick="deleteInstructorUI(${idx})" title="Delete Instructor">
+                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                        </button>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border); padding-top: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="repeat-2" style="width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0;"></i>
+                        <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Back-to-Back</span>
+                        <select onchange="window.scheduler.updateInstructor(${idx}, 'pref', this.value)"
+                                style="font-size: 0.75rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 3px 6px; cursor: pointer;">
+                            <option value="No preference" ${(inst.pref || '').toLowerCase().includes('no preference') || !(inst.pref || '').trim() ? 'selected' : ''}>No preference</option>
+                            <option value="Yes"           ${(inst.pref || '').toLowerCase().includes('yes') ? 'selected' : ''}>Yes – prefer B2B</option>
+                            <option value="No"            ${(inst.pref || '').toLowerCase().includes('no') && !(inst.pref || '').toLowerCase().includes('preference') ? 'selected' : ''}>No – spread out</option>
+                        </select>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border); padding-top: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Constraints</span>
+                            <div style="display: flex; gap: 4px;">
+                                <select id="add-day-${idx}" style="font-size: 0.75rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text);">
+                                    ${state.config.days.map(d => `<option value="${d}">${d}</option>`).join('')}
+                                </select>
+                                <select id="add-time-${idx}" style="font-size: 0.75rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text);">
+                                    ${state.config.slots.map(s => `<option value="${s}">${s}</option>`).join('')}
+                                </select>
+                                <button class="btn btn-ghost" style="padding: 2px 6px; border: 1px solid var(--border);" onclick="addConstraintUI(${idx})">
+                                    <i data-lucide="plus" style="width: 12px; height: 12px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="constraints-${idx}" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            ${inst.unavail.length === 0 ? '<span style="font-size: 0.75rem; color: var(--text-muted); italic;">No constraints</span>' : inst.unavail.sort().map(slot => `
+                                <div class="btn btn-ghost" style="font-size: 0.7rem; padding: 2px 8px; background: var(--danger)11; border: 1px solid var(--danger)33; color: var(--danger); border-radius: 12px; gap: 4px;">
+                                    ${slot}
+                                    <i data-lucide="x" style="width: 10px; height: 10px; cursor: pointer;" onclick="removeConstraintUI(${idx}, '${slot}')"></i>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        };
+
+        function addConstraintUI(idx) {
+            const day = document.getElementById(`add-day-${idx}`).value;
+            const time = document.getElementById(`add-time-${idx}`).value;
+            const slot = `${day} ${time}`;
+            window.scheduler.addConstraint(idx, slot);
+            window.scheduler.onPreview(window.scheduler.state); // Re-render preview
+        }
+
+        function removeConstraintUI(idx, slot) {
+            window.scheduler.removeConstraint(idx, slot);
+            window.scheduler.onPreview(window.scheduler.state); // Re-render preview
+        }
+
+        function addInstructorUI() {
+            window.scheduler.addInstructor();
+
+            // Scroll to bottom and focus new input
+            const list = document.getElementById('preview-list');
+            list.scrollTop = list.scrollHeight;
+
+            const newIdx = window.scheduler.state.instructors.length - 1;
+            setTimeout(() => {
+                const input = document.getElementById(`inst-name-${newIdx}`);
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }, 50);
+        }
+
+        function deleteInstructorUI(idx) {
+            if (confirm("Are you sure you want to remove this instructor?")) {
+                window.scheduler.deleteInstructor(idx);
+            }
+        }
+
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', next);
+            document.getElementById('theme-icon').setAttribute('data-lucide', next === 'dark' ? 'moon' : 'sun');
+            lucide.createIcons();
+        }
+
+        // --- Scheduler UI Integration ---
+        window.scheduler.onRender = (state) => {
+            const grid = document.getElementById('main-grid');
+            const roster = document.getElementById('sidebar-roster');
+            const { days, slots, coreCourses } = state.config;
+
+            // Render Roster
+            roster.innerHTML = state.instructors.sort((a, b) => a.name.localeCompare(b.name)).map(inst => {
+                const assignments = inst.assignments || [];
+                const required = inst.required || 0;
+                const assigned = assignments.length;
+                const prefRaw = (inst.pref || "").trim().toLowerCase();
+
+                // 1. Back-to-Back Status
+                let btBMarkup = "";
+                const isB2Byes = prefRaw.includes("yes");
+                const isB2Bno = prefRaw.includes("no") && !prefRaw.includes("preference");
+
+                if (required > 1 && (isB2Byes || isB2Bno)) {
+                    const daysMap = {};
+                    assignments.forEach(a => {
+                        const [d, t] = a.split(' ');
+                        (daysMap[d] = daysMap[d] || []).push(window.scheduler.state.config.slots.indexOf(t));
+                    });
+
+                    let hasAdjacent = false;
+                    Object.values(daysMap).forEach(idxs => {
+                        idxs.sort((a, b) => a - b);
+                        for (let i = 0; i < idxs.length - 1; i++) {
+                            if (idxs[i + 1] - idxs[i] === 1) hasAdjacent = true;
+                        }
+                    });
+
+                    if (isB2Byes) {
+                        btBMarkup = hasAdjacent ? '<span style="font-size: 10px; color: #10b981;">✨ Got B2B!</span>' : '<span style="font-size: 10px; color: var(--danger);">❌ No B2B</span>';
+                    } else {
+                        btBMarkup = !hasAdjacent ? '<span style="font-size: 10px; color: #10b981;">✨ Spaced out!</span>' : '<span style="font-size: 10px; color: var(--danger);">❌ Got B2B</span>';
+                    }
+                }
+
+                // 2. Conflict Tooltip
+                let conflictMarkup = "";
+                if (inst.unavail.length > 0) {
+                    const grouped = {};
+                    inst.unavail.forEach(u => {
+                        const pts = u.split(' ');
+                        if (pts[0] && pts[1]) (grouped[pts[0]] = grouped[pts[0]] || []).push(pts[1]);
+                    });
+                    const tooltip = Object.entries(grouped).map(([d, times]) => `${d}: ${times.sort().join(', ')} `).join('\n');
+                    conflictMarkup = `<span style="font-size: 10px; color: var(--danger); border-bottom: 1px dotted var(--danger); cursor: help;" title="Conflicts:\n${tooltip}">⚠️ Conflicts</span> `;
+                }
+
+                // 3. Assignment Tooltip
+                const assignGrouped = {};
+                assignments.forEach(a => {
+                    const pts = a.split(' ');
+                    (assignGrouped[pts[0]] = assignGrouped[pts[0]] || []).push(pts[1]);
+                });
+                const assignTooltip = Object.entries(assignGrouped).map(([d, times]) => `${d}: ${times.sort().join(', ')} `).join('\n');
+                const assignMarkup = `<span style="font-size: 10px; color: var(--primary); border-bottom: 1px dotted var(--primary); cursor: help;" title="Scheduled:\n${assignTooltip || 'None'}">📅 Slots</span> `;
+
+                return `
+                <div class="staff-card" draggable="true" ondragstart="handleDragStart(event)"
+            onmouseenter="highlightStaff('${inst.name}')" onmouseleave="clearHighlights()"
+            data-name="${inst.name}" data-course="${inst.course}" data-mrr="${inst.isMRR}">
+                    <div class="flex-between">
+                        <span class="course-badge">${inst.course}</span>
+                        <span style="font-size: 10px; opacity: 0.7;">${assigned}/${required}h</span>
+                    </div>
+                    <strong style="color: var(--text);">${inst.name}</strong>
+                    <div style="margin-top: 4px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        ${btBMarkup}
+                        ${assignMarkup}
+                        ${conflictMarkup}
+                    </div>
+                </div>
+                `}).join('');
+
+            // Build Grid Template
+            grid.style.gridTemplateColumns = `80px repeat(${days.length}, 1fr)`;
+            grid.innerHTML = '<div class="grid-header">Time</div>' + days.map(d => `<div class="grid-header"> ${d}</div> `).join('');
+
+            slots.forEach(t => {
+                grid.innerHTML += `<div class="grid-time"> ${t}</div> `;
+                days.forEach(d => {
+                    const isFriPM = d === 'Fri' && (parseInt(t) >= 13);
+                    if (isFriPM) {
+                        grid.innerHTML += `<div class="grid-cell" style="background: var(--border); opacity: 0.3;"></div> `;
+                    } else {
+                        const slotId = `${d} ${t}`;
+                        const entries = state.schedule[d]?.[t] || [];
+                        const cellHtml = entries.map(s => `
+                <div class="staff-card" draggable="true" ondragstart="handleDragStart(event)"
+            onmouseenter="highlightStaff('${s.name}')" onmouseleave="clearHighlights()"
+            data-name="${s.name}" data-course="${s.course}" data-mrr="${s.isMRR}">
+                                <span class="course-badge">${s.course}</span>
+                                <strong>${s.name}</strong>
+                            </div>
+                `).join('');
+                        grid.innerHTML += `
+                <div class="grid-cell" id="${slotId}" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                    ${cellHtml}
+                            </div>
+                `;
+                    }
+                });
+            });
+
+            updateMRRClaims();
+            refreshGaps(state);
+            refreshHoursWarnings(state);
+            lucide.createIcons();
+        };
+
+        // --- Undo ---
+        function undo() {
+            window.scheduler.undo();
+        }
+
+        // --- Drag & Drop ---
+        let draggingItem = null;
+        function handleDragStart(e) {
+            draggingItem = e.target;
+            e.target.classList.add('dragging');
+
+            // Highlight unavailability
+            const name = e.target.dataset.name;
+            const staff = window.scheduler.state.instructors.find(i => i.name === name);
+            if (staff) {
+                staff.unavail.forEach(id => {
+                    const cell = document.getElementById(id);
+                    if (cell) cell.classList.add('unavail-highlight');
+                });
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const cell = e.target.closest('.grid-cell');
+            const targetStaffCard = e.target.closest('.staff-card');
+
+            if (cell && draggingItem) {
+                const name = draggingItem.dataset.name;
+                const staff = window.scheduler.state.instructors.find(i => i.name === name);
+                const oldId = draggingItem.parentElement.id;
+                const newId = cell.id;
+
+                if (oldId === newId) {
+                    cleanupDrag();
+                    return;
+                }
+
+                // Swap Logic
+                if (targetStaffCard && targetStaffCard !== draggingItem) {
+                    const targetName = targetStaffCard.dataset.name;
+                    const targetStaff = window.scheduler.state.instructors.find(i => i.name === targetName);
+
+                    if (targetStaff) {
+                        // Check if either person is unavailable in their proposed new slots
+                        if (staff && staff.unavail.includes(newId)) {
+                            if (!confirm(`${name} is unavailable at ${newId}. Proceed with swap?`)) {
+                                cleanupDrag();
+                                return;
+                            }
+                        }
+                        if (targetStaff && targetStaff.unavail.includes(oldId)) {
+                            if (!confirm(`${targetName} is unavailable at ${oldId}. Proceed with swap?`)) {
+                                cleanupDrag();
+                                return;
+                            }
+                        }
+
+                        window.scheduler.swapStaff(name, oldId, targetName, newId);
+                        cleanupDrag();
+                        return;
+                    }
+                }
+
+                if (staff && staff.unavail.includes(cell.id)) {
+                    if (!confirm(`${name} is unavailable at ${cell.id}. Proceed?`)) {
+                        cleanupDrag();
+                        return;
+                    }
+                }
+
+                if (staff && staff.assignments && staff.assignments.includes(newId)) {
+                    alert(`${name} is already assigned to ${newId}. Cannot assign the same person twice to the same slot.`);
+                    cleanupDrag();
+                    return;
+                }
+
+                // Update state via the scheduler engine
+                window.scheduler.moveStaff(name, oldId, newId);
+            }
+            cleanupDrag();
+        }
+
+        // --- Manual Swap Logic ---
+        function openSwapModal() {
+            const modal = document.getElementById('swap-modal');
+            const staffSelectA = document.getElementById('swap-staff-a');
+            const staffSelectB = document.getElementById('swap-staff-b');
+
+            if (!staffSelectA || !staffSelectB || !window.scheduler.state.instructors.length) {
+                alert("No schedule generated yet.");
+                return;
+            }
+
+            // Populate staff dropdowns
+            const optionsHtml = '<option value="">Select Staff...</option>' +
+                window.scheduler.state.instructors
+                    .filter(i => i.assignments && i.assignments.length > 0)
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(i => `<option value="${i.name}">${i.name}</option>`)
+                    .join('');
+
+            staffSelectA.innerHTML = optionsHtml;
+            staffSelectB.innerHTML = optionsHtml;
+
+            // Reset slots
+            document.getElementById('swap-slot-a').innerHTML = '<option value="">Select assignment to swap...</option>';
+            document.getElementById('swap-slot-b').innerHTML = '<option value="">Select assignment to swap...</option>';
+
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+        }
+
+        function closeSwapModal() {
+            const modal = document.getElementById('swap-modal');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+        }
+
+        function populateSwapSlots(which) {
+            const name = document.getElementById(`swap-staff-${which}`).value;
+            const slotSelect = document.getElementById(`swap-slot-${which}`);
+
+            if (!name) {
+                slotSelect.innerHTML = '<option value="">Select assignment to swap...</option>';
+                return;
+            }
+
+            const staff = window.scheduler.state.instructors.find(i => i.name === name);
+            if (!staff || !staff.assignments.length) {
+                slotSelect.innerHTML = '<option value="">No assignments</option>';
+                return;
+            }
+
+            slotSelect.innerHTML = staff.assignments
+                .sort()
+                .map(slot => `<option value="${slot}">${slot}</option>`)
+                .join('');
+        }
+
+        function executeManualSwap() {
+            const nameA = document.getElementById('swap-staff-a').value;
+            const slotA = document.getElementById('swap-slot-a').value;
+            const nameB = document.getElementById('swap-staff-b').value;
+            const slotB = document.getElementById('swap-slot-b').value;
+
+            if (!nameA || !slotA || !nameB || !slotB) {
+                alert("Please select Staff and Assignments for both A and B.");
+                return;
+            }
+
+            if (nameA === nameB) {
+                alert("Cannot swap a staff member with themselves.");
+                return;
+            }
+
+            const staffA = window.scheduler.state.instructors.find(i => i.name === nameA);
+            const staffB = window.scheduler.state.instructors.find(i => i.name === nameB);
+
+            // Constraint checks
+            if (staffA.unavail.includes(slotB)) {
+                if (!confirm(`${nameA} is unavailable at ${slotB}. Proceed?`)) return;
+            }
+            if (staffB.unavail.includes(slotA)) {
+                if (!confirm(`${nameB} is unavailable at ${slotA}. Proceed?`)) return;
+            }
+
+            window.scheduler.swapStaff(nameA, slotA, nameB, slotB);
+            closeSwapModal();
+        }
+
+        function cleanupDrag() {
+            if (draggingItem) draggingItem.classList.remove('dragging');
+            clearHighlights();
+            draggingItem = null;
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.unavail-highlight').forEach(el => el.classList.remove('unavail-highlight'));
+            document.querySelectorAll('.assignment-highlight').forEach(el => el.classList.remove('assignment-highlight'));
+        }
+
+        function highlightStaff(name) {
+            clearHighlights();
+            const staff = window.scheduler.state.instructors.find(i => i.name === name);
+            if (!staff) return;
+
+            // Highlight all instances of this staff member in the grid (Assignments)
+            document.querySelectorAll(`.staff-card[data-name="${name}"]`).forEach(card => {
+                card.classList.add('assignment-highlight');
+            });
+
+            // Highlight constraints in red
+            staff.unavail.forEach(id => {
+                const cell = document.getElementById(id);
+                if (cell) cell.classList.add('unavail-highlight');
+            });
+        }
+
+        function normalizeCourse(c) {
+            if (!c) return "";
+            return String(c).replace(/[\s\-_]/g, '').toUpperCase();
+        }
+
+        function updateMRRClaims() {
+            // Logic to update MRR tags based on current coverage
+            const coreCourses = window.scheduler.state.config.coreCourses;
+            if (!coreCourses || coreCourses.length === 0) return;
+
+            const normCore = coreCourses.map(c => normalizeCourse(c));
+
+            document.querySelectorAll('.grid-cell[id]').forEach(cell => {
+                const entries = Array.from(cell.querySelectorAll('.staff-card'));
+                const primaries = entries.filter(e => e.dataset.mrr === 'false').map(e => e.dataset.course);
+                const normPrimaries = primaries.map(p => normalizeCourse(p));
+
+                const missing = coreCourses.filter((c, idx) => {
+                    const nc = normCore[idx];
+                    // Found if any primary course matches the core course
+                    return !normPrimaries.some(np => np.includes(nc) || nc.includes(np));
+                });
+
+                if (missing.length > 0) {
+                    console.log(`Slot ${cell.id} missing: `, missing);
+                }
+
+                const mrrs = entries.filter(e => e.dataset.mrr === 'true');
+                mrrs.forEach((mrr, i) => {
+                    const share = Math.ceil(missing.length / mrrs.length);
+                    const claims = missing.slice(i * share, (i + 1) * share);
+                    const tag = mrr.querySelector('.course-badge');
+                    tag.innerText = claims.length > 0 ? `MRR / ${claims.join(', ')} ` : 'MRR/Gen';
+                });
+            });
+        }
+
+        function refreshGaps(state) {
+            const gapArea = document.getElementById('gap-indicators');
+            const alertArea = document.getElementById('schedule-alerts');
+            if (!gapArea || !alertArea) return;
+
+            gapArea.innerHTML = '';
+
+            // Clear previous gap alerts from the top alert area
+            const existingAlerts = alertArea.querySelectorAll('.gap-alert');
+            existingAlerts.forEach(a => a.remove());
+
+            const coreCourses = state.config.coreCourses;
+            const normCore = coreCourses.map(c => normalizeCourse(c));
+            let totalGaps = 0;
+            let gapDetails = [];
+
+            document.querySelectorAll('.grid-cell[id]').forEach(cell => {
+                const entries = Array.from(cell.querySelectorAll('.staff-card'));
+                const hasMRR = entries.some(e => e.dataset.mrr === 'true');
+                const primaries = entries.filter(e => e.dataset.mrr === 'false').map(e => e.dataset.course);
+                const normPrimaries = primaries.map(p => normalizeCourse(p));
+
+                const missing = coreCourses.filter((c, idx) => {
+                    const nc = normCore[idx];
+                    return !normPrimaries.some(np => np.includes(nc) || nc.includes(np));
+                });
+
+                if (missing.length > 0 && !hasMRR) {
+                    totalGaps++;
+                    gapDetails.push(`${cell.id} (Missing: ${missing.join(', ')})`);
+                    if (totalGaps < 8) { // Don't overwhelm UI sidebar
+                        const gap = document.createElement('div');
+                        gap.className = 'gap-indicator';
+                        gap.innerText = `${cell.id}: Missing ${missing.join(', ')} `;
+                        gapArea.appendChild(gap);
+                    }
+                }
+            });
+
+            if (totalGaps > 0) {
+                const alert = document.createElement('div');
+                alert.className = 'gap-alert';
+                alert.style.cssText = 'background: #fef2f2; border: 1px solid #f87171; color: #b91c1c; padding: 12px 16px; border-radius: 8px; font-weight: 500; font-size: 0.9rem; display: flex; align-items: flex-start; gap: 12px;';
+                alert.innerHTML = `
+                    <i data-lucide="alert-triangle" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;"></i>
+                    <div>
+                        <div style="font-weight: 700; margin-bottom: 4px;">Coverage Gaps Detected (${totalGaps})</div>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">${gapDetails.slice(0, 5).join(' • ')}${gapDetails.length > 5 ? `... and ${gapDetails.length - 5} more.` : ''}</div>
+                    </div>
+                `;
+                alertArea.appendChild(alert);
+            }
+        }
+
+        function refreshHoursWarnings(state) {
+            const alertArea = document.getElementById('schedule-alerts');
+            if (!alertArea) return;
+
+            // Clear previous hours alerts
+            const existingAlerts = alertArea.querySelectorAll('.hours-alert');
+            existingAlerts.forEach(a => a.remove());
+
+            const missingHoursStaff = state.instructors.filter(inst => {
+                const assigned = inst.assigned || 0;
+                const required = inst.required || 0;
+                return assigned < required;
+            });
+
+            const overAssignedStaff = state.instructors.filter(inst => {
+                const assigned = inst.assigned || 0;
+                const required = inst.required || 0;
+                return assigned > required;
+            });
+
+            if (missingHoursStaff.length > 0) {
+                const alert = document.createElement('div');
+                alert.className = 'hours-alert';
+                alert.style.cssText = 'background: #fffbeb; border: 1px solid #fbbf24; color: #b45309; padding: 12px 16px; border-radius: 8px; font-weight: 500; font-size: 0.9rem; display: flex; align-items: flex-start; gap: 12px;';
+                const details = missingHoursStaff.map(s => `${s.name} (${s.assigned}/${s.required})`).join(', ');
+                alert.innerHTML = `
+                    <i data-lucide="clock" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;"></i>
+                    <div>
+                        <div style="font-weight: 700; margin-bottom: 4px;">Incomplete Assignments (${missingHoursStaff.length} staff)</div>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">The following staff need more hours: ${details}</div>
+                    </div>
+                `;
+                alertArea.appendChild(alert);
+            }
+
+            if (overAssignedStaff.length > 0) {
+                const alert = document.createElement('div');
+                alert.className = 'hours-alert';
+                alert.style.cssText = 'background: #fef2f2; border: 1px solid #f87171; color: #b91c1c; padding: 12px 16px; border-radius: 8px; font-weight: 500; font-size: 0.9rem; display: flex; align-items: flex-start; gap: 12px;';
+                const details = overAssignedStaff.map(s => `${s.name} (${s.assigned}/${s.required})`).join(', ');
+                alert.innerHTML = `
+                    <i data-lucide="alert-circle" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;"></i>
+                    <div>
+                        <div style="font-weight: 700; margin-bottom: 4px;">Over-Assigned Staff (${overAssignedStaff.length} staff)</div>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">The following staff have too many hours: ${details}</div>
+                    </div>
+                `;
+                alertArea.appendChild(alert);
+            }
+        }
+
+        function exportHTML() {
+            const gridHTML = document.getElementById('main-grid').innerHTML;
+            const theme = document.body.getAttribute('data-theme') || 'light';
+
+            const inlinedCSS = `:root {
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --background: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --accent: #ec4899;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --sidebar-width: 320px;
+    --glass: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --radius: 12px;
+}
+[data-theme="dark"] {
+    --background: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.8);
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --glass: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 24px;
+    overflow: auto;
+    height: auto;
+}
+.schedule-grid {
+    display: grid !important;
+    grid-template-columns: 80px repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 1400px;
+}
+.grid-header {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+.grid-time {
+    background: var(--background);
+    padding: 12px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border);
+}
+.grid-cell {
+    background: var(--card-bg);
+    min-height: 120px;
+    padding: 8px;
+}
+.staff-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.course-badge {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}`;
+
+            const content = `<!DOCTYPE html>
+<html lang="en" data-theme="${theme}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRR Schedule Export - ${new Date().toLocaleDateString()}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <style>${inlinedCSS}</style>
+</head>
+<body>
+    <div class="schedule-grid" id="main-grid">
+        ${gridHTML}
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MRR_Schedule_${new Date().toISOString().slice(0, 10)}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        let heatmapActive = false;
+        function toggleHeatmap() {
+            heatmapActive = !heatmapActive;
+            const state = window.scheduler.state;
+            const totalStaff = state.instructors.length;
+
+            document.querySelectorAll('.grid-cell[id]').forEach(cell => {
+                cell.className = 'grid-cell'; // Reset
+                if (!heatmapActive) return;
+
+                const unavailCount = state.instructors.filter(i => i.unavail.includes(cell.id)).length;
+                const ratio = (totalStaff - unavailCount) / totalStaff;
+                const score = Math.floor(ratio * 4); // 0-4
+                cell.classList.add(`heatmap-${score}`);
+            });
+        }
+    </script>
+</body>
+
+</html>

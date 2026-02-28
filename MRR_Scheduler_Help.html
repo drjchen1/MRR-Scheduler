@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handbook | MRR Scheduler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+        }
+
+        .section {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text);
+        }
+
+        h2 i {
+            color: var(--primary);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            padding: 24px;
+            border-radius: 16px;
+            background: rgba(99, 102, 241, 0.03);
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card i {
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .feature-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 20px;
+        }
+
+        .step-num {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+        }
+
+        .step-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .step-content p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .requirement-box {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .req-card {
+            padding: 20px;
+            border-radius: 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .req-card i {
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 99px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 60px;
+            padding-bottom: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>MRR Scheduler Handbook</h1>
+            <p class="subtitle">Elevating Clinical Scheduling with Intelligent Automation</p>
+        </header>
+
+        <!-- Requirements -->
+        <div class="section">
+            <h2><i data-lucide="package"></i> What You Need</h2>
+            <p style="margin-bottom: 24px; color: var(--text-muted);">The scheduler streamlines three core datasets into
+                a single optimized clinical roster.</p>
+            <div class="requirement-box">
+                <div class="req-card">
+                    <i data-lucide="users" style="width: 32px; height: 32px;"></i>
+                    <div style="font-weight: 600;">People CSV</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Survey Responses</div>
+                </div>
+                <div class="req-card">
+                    <i data-lucide="book-open" style="width: 32px; height: 32px;"></i>
+                    <div style="font-weight: 600;">Teaching CSV</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Section Assignments</div>
+                </div>
+                <div class="req-card">
+                    <i data-lucide="shield-check" style="width: 32px; height: 32px;"></i>
+                    <div style="font-weight: 600;">MRR CSV</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">MRR Staffing List</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow -->
+        <div class="section">
+            <h2><i data-lucide="zap"></i> How To Run</h2>
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h3>Effortless Upload</h3>
+                        <p>Drag all three required CSV files into the unified drop zone. Once identified, the system
+                            unlocks the data pipeline.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h3>Intelligent Data Preview <span class="badge">PRO</span></h3>
+                        <p>Verify extracted instructor counts and course labels. Correct any OCR or labeling errors
+                            directly in the browser by clicking any text field.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h3>Precision Constraint Management</h3>
+                        <p>Add specific unavailable time slots or remove existing conflicts on the fly. The scheduler
+                            respects every manual override during generation.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">4</div>
+                    <div class="step-content">
+                        <h3>Final Synthesis</h3>
+                        <p>Hit "Make Schedule" to run the proprietary ranking algorithm. In seconds, you'll have a fully
+                            balanced, conflict-free staffing solution.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="section">
+            <h2><i data-lucide="sparkles"></i> Super Duper Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i data-lucide="shield" style="width: 32px; height: 32px;"></i>
+                    <strong>Conflict Armor</strong>
+                    The engine automatically identifies overlaps between teaching duties and MRR assignments, ensuring
+                    no one is double-booked.
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="layers" style="width: 32px; height: 32px;"></i>
+                    <strong>B2B Optimization</strong>
+                    Whether staff love or hate back-to-back classes, our system honors individual preferences to
+                    maximize satisfaction.
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="flame" style="width: 32px; height: 32px;"></i>
+                    <strong>Availability Heatmap</strong>
+                    A visual spectrum of your staffing depth. Instantly spot vulnerable slots and move resources where
+                    they are most needed.
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="mouse-pointer-2" style="width: 32px; height: 32px;"></i>
+                    <strong>Live Drag & Drop</strong>
+                    Manual fine-tuning is simple. Drag any staff card to a new slot; the roster statistics update in
+                    real-time.
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="history" style="width: 32px; height: 32px;"></i>
+                    <strong>Infinite Undo</strong>
+                    Experiment with your schedule without fear. Every move is tracked and can be reverted instantly.
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="share" style="width: 32px; height: 32px;"></i>
+                    <strong>One-Click Export</strong>
+                    Save your final masterpiece as a standalone interactive dashboard that looks identical to your
+                    working view.
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="alert-triangle" style="width: 32px; height: 32px;"></i>
+                    <strong>Intelligent Warnings</strong>
+                    Never leave a slot uncovered. Get instant top-bar alerts for course coverage gaps and under-assigned
+                    staff.
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="arrow-left-right" style="width: 32px; height: 32px;"></i>
+                    <strong>Seamless Swapping</strong>
+                    Trade assignments effortlessly. Drag one staff card onto another to instantly swap them, or use the
+                    "Swap Staff" menu for distant slots.
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Advanced Academic Staffing Dashboard | Premium Edition
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+    </script>
+</body>
+
+</html>
