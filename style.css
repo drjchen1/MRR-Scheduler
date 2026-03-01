@@ -56,6 +56,15 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 10;
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar-hidden .sidebar {
+    display: none;
+}
+
+.sidebar-hidden .main-content {
+    width: 100vw;
 }
 
 .sidebar-header {
@@ -233,6 +242,10 @@ body {
     color: var(--accent);
 }
 
+.staff-name {
+    font-weight: 700;
+}
+
 /* Gaps */
 .gap-indicator {
     background: var(--danger);
@@ -286,3 +299,84 @@ body {
 }
 
 /* V-Easy */
+
+/* Full View Mode */
+.full-view-mode .sidebar {
+    display: none;
+}
+
+.full-view-mode .main-content {
+    width: 100vw;
+}
+
+.full-view-mode .content-body {
+    padding: 4px;
+    overflow: hidden;
+}
+
+.full-view-mode .schedule-grid {
+    height: calc(100vh - 72px);
+    grid-template-rows: 32px repeat(8, 1fr);
+}
+
+.full-view-mode .grid-header {
+    padding: 2px;
+    font-size: 11px;
+}
+
+.full-view-mode .grid-time {
+    padding: 2px;
+    font-size: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.full-view-mode .grid-cell {
+    min-height: 0;
+    padding: 2px;
+    overflow: hidden;
+    /* No scrolling in cells */
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.full-view-mode .staff-card {
+    padding: 1px 2px;
+    margin-bottom: 0;
+    font-size: 9px;
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.full-view-mode .staff-card-header {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+}
+
+.full-view-mode .course-badge {
+    font-size: 7px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.full-view-mode .staff-name {
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.full-view-mode .staff-card strong {
+    display: none;
+}
+
+.full-view-mode .staff-card div:not(.staff-card-header) {
+    display: none !important;
+}

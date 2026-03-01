@@ -37,28 +37,36 @@
         <main class="main-content">
             <header class="top-nav">
                 <div style="display: flex; gap: 16px;">
-                    <button class="btn btn-ghost" onclick="toggleTheme()" title="Toggle Theme">
-                        <i data-lucide="sun" id="theme-icon"></i>
-                    </button>
-                    <button class="btn btn-ghost" onclick="undo()" title="Undo action">
-                        <i data-lucide="undo-2"></i>
-                        <span>Undo</span>
-                    </button>
-                </div>
-                <div style="display: flex; gap: 12px;">
-                    <button class="btn btn-ghost" onclick="openSwapModal()">
-                        <i data-lucide="arrow-left-right"></i>
-                        <span>Swap Staff</span>
-                    </button>
-                    <button class="btn btn-ghost" onclick="toggleHeatmap()">
-                        <i data-lucide="flame"></i>
-                        <span>Heatmap</span>
-                    </button>
-                    <button class="btn btn-primary" onclick="exportHTML()">
-                        <i data-lucide="download"></i>
-                        <span>Export Schedule</span>
-                    </button>
-                </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <button class="btn btn-ghost" onclick="toggleSidebar()" title="Toggle Roster">
+                            <i data-lucide="menu"></i>
+                        </button>
+                        <button class="btn btn-ghost" onclick="toggleTheme()" title="Toggle Theme">
+                            <i data-lucide="sun" id="theme-icon"></i>
+                        </button>
+                        <button class="btn btn-ghost" onclick="undo()" title="Undo action">
+                            <i data-lucide="undo-2"></i>
+                            <span>Undo</span>
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-ghost" onclick="openSwapModal()">
+                            <i data-lucide="arrow-left-right"></i>
+                            <span>Swap Staff</span>
+                        </button>
+                        <button class="btn btn-ghost" onclick="toggleHeatmap()">
+                            <i data-lucide="flame"></i>
+                            <span>Heatmap</span>
+                        </button>
+                        <button class="btn btn-ghost" onclick="toggleFullView()" title="Toggle Full View">
+                            <i data-lucide="maximize" id="fullview-icon"></i>
+                            <span>Full View</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="exportHTML()">
+                            <i data-lucide="download"></i>
+                            <span>Export Schedule</span>
+                        </button>
+                    </div>
             </header>
 
             <div class="content-body" id="app-body">
@@ -540,6 +548,25 @@
             }
         }
 
+        // --- Full View Logic ---
+        function toggleFullView() {
+            const body = document.body;
+            const isFull = body.classList.toggle('full-view-mode');
+            const icon = document.getElementById('fullview-icon');
+            icon.setAttribute('data-lucide', isFull ? 'minimize' : 'maximize');
+            lucide.createIcons();
+
+            // Re-render to adjust grid layout if needed
+            if (window.scheduler.state.schedule && Object.keys(window.scheduler.state.schedule).length > 0) {
+                window.scheduler.render();
+            }
+        }
+
+        function toggleSidebar() {
+            document.body.classList.toggle('sidebar-hidden');
+            lucide.createIcons();
+        }
+
         // --- Theme Logic ---
         function toggleTheme() {
             const body = document.body;
@@ -641,19 +668,37 @@
                     } else {
                         const slotId = `${d} ${t}`;
                         const entries = state.schedule[d]?.[t] || [];
-                        const cellHtml = entries.map(s => `
-                <div class="staff-card" draggable="true" ondragstart="handleDragStart(event)"
-            onmouseenter="highlightStaff('${s.name}')" onmouseleave="clearHighlights()"
-            data-name="${s.name}" data-course="${s.course}" data-mrr="${s.isMRR}">
-                                <span class="course-badge">${s.course}</span>
-                                <strong>${s.name}</strong>
-                            </div>
-                `).join('');
+                        const isFullView = document.body.classList.contains('full-view-mode');
+
+                        const cellHtml = entries.map(s => {
+                            let displayName = s.name;
+                            if (isFullView) {
+                                // Abbreviate: "Doe, John" -> "Doe, J."
+                                const parts = s.name.split(',');
+                                if (parts.length > 1) {
+                                    const last = parts[0].trim();
+                                    const firstParts = parts[1].trim().split(/\s+/);
+                                    const initials = firstParts.map(p => p[0].toUpperCase() + '.').join(' ');
+                                    displayName = `${last}, ${initials}`;
+                                }
+                            }
+
+                            return `
+                                <div class="staff-card" draggable="true" ondragstart="handleDragStart(event)"
+                                     onmouseenter="highlightStaff('${s.name}')" onmouseleave="clearHighlights()"
+                                     data-name="${s.name}" data-course="${s.course}" data-mrr="${s.isMRR}">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">${s.course}</span>
+                                        <span class="staff-name">${displayName}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
                         grid.innerHTML += `
-                <div class="grid-cell" id="${slotId}" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
-                    ${cellHtml}
+                            <div class="grid-cell" id="${slotId}" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                ${cellHtml}
                             </div>
-                `;
+                        `;
                     }
                 });
             });
@@ -1010,10 +1055,14 @@
         }
 
         function exportHTML() {
+            const isFullMode = document.body.classList.contains('full-view-mode');
+            const choice = confirm("Export Full View? (Cancel for Normal View)");
+            const exportFull = choice;
+
             const gridHTML = document.getElementById('main-grid').innerHTML;
             const theme = document.body.getAttribute('data-theme') || 'light';
 
-            const inlinedCSS = `:root {
+            let inlinedCSS = `:root {
     --primary: #6366f1;
     --primary-hover: #4f46e5;
     --background: #f8fafc;
@@ -1100,11 +1149,84 @@ body {
     text-transform: uppercase;
     color: var(--accent);
 }
+.staff-name {
+    font-weight: 700;
+}
 .flex-between {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}`;
+}
+div[style*="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;"] {
+    display: flex !important;
+}
+`;
+
+            if (exportFull) {
+                inlinedCSS += `
+body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
+.full-view-mode .schedule-grid {
+    height: 100%;
+    max-width: none;
+    grid-template-rows: 32px repeat(8, 1fr);
+}
+.full-view-mode .grid-header { padding: 2px; font-size: 11px; }
+.full-view-mode .grid-time { padding: 2px; font-size: 10px; }
+.full-view-mode .grid-cell {
+    min-height: 0;
+    padding: 2px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.full-view-mode .staff-card {
+    padding: 1px 2px;
+    margin-bottom: 0;
+    font-size: 9px;
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+.full-view-mode .staff-card-header {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+}
+.full-view-mode .course-badge { font-size: 7px; flex-shrink: 0; }
+.full-view-mode .staff-name {
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.full-view-mode .staff-card strong { display: none; }
+.full-view-mode .staff-card div:not(.staff-card-header) { display: none !important; }
+`;
+            }
+
+            // In Full View export, we need to abbreviate the names in the HTML we already got
+            let finalGridHTML = gridHTML;
+            if (exportFull) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = gridHTML;
+                tempDiv.querySelectorAll('.staff-name').forEach(el => {
+                    const name = el.innerText;
+                    const parts = name.split(',');
+                    if (parts.length > 1) {
+                        const last = parts[0].trim();
+                        const firstParts = parts[1].trim().split(/\s+/);
+                        const initials = firstParts.map(p => p[0].toUpperCase() + '.').join(' ');
+                        el.innerText = `${last}, ${initials}`;
+                    }
+                });
+                finalGridHTML = tempDiv.innerHTML;
+            }
 
             const content = `<!DOCTYPE html>
 <html lang="en" data-theme="${theme}">
@@ -1117,9 +1239,9 @@ body {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
     <style>${inlinedCSS}</style>
 </head>
-<body>
+<body class="${exportFull ? 'full-view-mode' : ''}">
     <div class="schedule-grid" id="main-grid">
-        ${gridHTML}
+        ${finalGridHTML}
     </div>
 </body>
 </html>`;
@@ -1128,7 +1250,7 @@ body {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `MRR_Schedule_${new Date().toISOString().slice(0, 10)}.html`;
+            a.download = `MRR_Schedule_${exportFull ? 'Full_' : ''}${new Date().toISOString().slice(0, 10)}.html`;
             a.click();
             URL.revokeObjectURL(url);
         }
