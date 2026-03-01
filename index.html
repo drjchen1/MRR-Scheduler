@@ -412,10 +412,18 @@
         }
 
         if (makeScheduleBtn) {
-            makeScheduleBtn.onclick = () => {
+            makeScheduleBtn.onclick = async () => {
                 document.getElementById('preview-stage').style.display = 'none';
                 document.getElementById('schedule-stage').style.display = 'block';
-                window.scheduler.runScheduler();
+                makeScheduleBtn.disabled = true;
+                makeScheduleBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i><span>Generating...</span>';
+                lucide.createIcons();
+
+                await window.scheduler.runScheduler();
+
+                makeScheduleBtn.disabled = false;
+                makeScheduleBtn.innerHTML = '<i data-lucide="calendar"></i><span>Make Schedule</span>';
+                lucide.createIcons();
             };
         }
 
@@ -683,8 +691,13 @@
                                 }
                             }
 
+                            const isActive = state.activeAssignment &&
+                                state.activeAssignment.d === d &&
+                                state.activeAssignment.t === t &&
+                                state.activeAssignment.name === s.name;
+
                             return `
-                                <div class="staff-card" draggable="true" ondragstart="handleDragStart(event)"
+                                <div class="staff-card ${isActive ? 'active-placement' : ''}" draggable="true" ondragstart="handleDragStart(event)"
                                      onmouseenter="highlightStaff('${s.name}')" onmouseleave="clearHighlights()"
                                      data-name="${s.name}" data-course="${s.course}" data-mrr="${s.isMRR}">
                                     <div class="staff-card-header">
@@ -706,6 +719,39 @@
             updateMRRClaims();
             refreshGaps(state);
             refreshHoursWarnings(state);
+
+            // Optimization Feedback
+            if (state.optimizationCount > 0) {
+                const alerts = document.getElementById('schedule-alerts');
+                if (alerts) {
+                    const isDone = !state.activeAssignment;
+                    const alertId = 'opt-alert';
+                    let alert = document.getElementById(alertId);
+                    if (!alert) {
+                        alert = document.createElement('div');
+                        alert.id = alertId;
+                        alert.className = 'glass-card animate-fade-in';
+                        alert.style.cssText = 'background: var(--success)22; border: 1px solid var(--success)44; padding: 12px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px;';
+                        alerts.prepend(alert);
+                    }
+                    alert.innerHTML = `
+                        <i data-lucide="sparkles" style="color: var(--success); width: 20px; height: 20px;"></i>
+                        <div style="flex: 1;">
+                            <strong style="color: var(--success); display: block; font-size: 0.9rem;">${isDone ? 'Optimization Complete' : 'Optimizing Schedule...'}</strong>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">${state.optimizationCount} assignments improved for better course balance and preferences.</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+
+                    if (isDone) {
+                        setTimeout(() => {
+                            const finalAlert = document.getElementById(alertId);
+                            if (finalAlert) finalAlert.classList.replace('animate-fade-in', 'animate-fade-out');
+                            setTimeout(() => finalAlert?.remove(), 400);
+                        }, 4000);
+                    }
+                }
+            }
             lucide.createIcons();
         };
 

@@ -208,7 +208,7 @@ class MRRScheduler {
     }
 
     // --- Scheduler Engine (scheduler2.py logic) ---
-    runScheduler() {
+    async runScheduler() {
         const { days, slots } = this.state.config;
         const schedule = {};
         days.forEach(d => {
@@ -226,12 +226,13 @@ class MRRScheduler {
             inst.assignments = [];
         });
 
+        this.state.schedule = schedule;
         const staffQueue = [...this.state.instructors].sort((a, b) => b.required - a.required);
 
         const maxReq = Math.max(...staffQueue.map(s => s.required), 0);
         for (let round = 0; round < maxReq; round++) {
-            staffQueue.forEach(person => {
-                if (person.assigned >= person.required) return;
+            for (const person of staffQueue) {
+                if (person.assigned >= person.required) continue;
 
                 const possible = [];
                 Object.keys(schedule).forEach(d => {
@@ -269,11 +270,27 @@ class MRRScheduler {
                     schedule[best.d][best.t].push({ name: person.name, course: person.course, isMRR: person.isMRR });
                     person.assigned++;
                     person.assignments.push(`${best.d} ${best.t}`);
+
+                    // Progressive rendering with focus (Only in Full View)
+                    const isFullView = document.body.classList.contains('full-view-mode');
+                    if (isFullView) {
+                        this.state.activeAssignment = { d: best.d, t: best.t, name: person.name };
+                        this.render();
+                        await new Promise(r => setTimeout(r, 60)); // "Eye candy" delay (slightly longer for focus)
+                    }
                 }
-            });
+            }
         }
 
-        this.state.schedule = schedule;
+        // Ensure last highlight is visible before optimization
+        if (document.body.classList.contains('full-view-mode')) {
+            await new Promise(r => setTimeout(r, 400));
+        }
+
+        this.state.activeAssignment = null;
+        this.state.optimizationCount = 0;
+
+        await this.optimizeSchedule();
 
         // Match core courses properly with normalization
         const normalizedPotential = this.state.config.potentialCore.map(c => this.normalizeCourse(c));
@@ -496,6 +513,101 @@ class MRRScheduler {
     }
 
     // --- UI Rendering ---
+    async optimizeSchedule() {
+        const { slots } = this.state.config;
+        const isFullView = document.body.classList.contains('full-view-mode');
+        let improved = true;
+        let iterations = 0;
+        const maxIterations = 2; // Limit passes to prevent infinite loops or long waits
+        let totalSwaps = 0;
+
+        while (improved && iterations < maxIterations) {
+            improved = false;
+            iterations++;
+
+            for (let i = 0; i < this.state.instructors.length; i++) {
+                for (let j = i + 1; j < this.state.instructors.length; j++) {
+                    const instA = this.state.instructors[i];
+                    const instB = this.state.instructors[j];
+
+                    for (let aIdx = 0; aIdx < instA.assignments.length; aIdx++) {
+                        for (let bIdx = 0; bIdx < instB.assignments.length; bIdx++) {
+                            const slotA = instA.assignments[aIdx];
+                            const slotB = instB.assignments[bIdx];
+
+                            if (slotA === slotB) continue;
+
+                            const [dA, tA] = slotA.split(' ');
+                            const [dB, tB] = slotB.split(' ');
+
+                            // Check constraints
+                            if (instA.unavail.includes(slotB) || instB.unavail.includes(slotA)) continue;
+                            if (instA.assignments.includes(slotB) || instB.assignments.includes(slotA)) continue;
+
+                            // Calculate scores
+                            const scoreCurrent = this.getAssignmentQuality(instA, dA, tA) + this.getAssignmentQuality(instB, dB, tB);
+
+                            // Temporary swap for scoring
+                            const instA_assignments_orig = [...instA.assignments];
+                            const instB_assignments_orig = [...instB.assignments];
+                            instA.assignments[aIdx] = slotB;
+                            instB.assignments[bIdx] = slotA;
+
+                            const scoreSwapped = this.getAssignmentQuality(instA, dB, tB) + this.getAssignmentQuality(instB, dA, tA);
+
+                            if (scoreSwapped < scoreCurrent) {
+                                // Keep swap - update state schedule array as well
+                                this.state.schedule[dA][tA] = this.state.schedule[dA][tA].filter(s => s.name !== instA.name);
+                                this.state.schedule[dA][tA].push({ name: instB.name, course: instB.course, isMRR: instB.isMRR });
+
+                                this.state.schedule[dB][tB] = this.state.schedule[dB][tB].filter(s => s.name !== instB.name);
+                                this.state.schedule[dB][tB].push({ name: instA.name, course: instA.course, isMRR: instA.isMRR });
+
+                                improved = true;
+                                totalSwaps++;
+
+                                if (isFullView) {
+                                    this.state.activeAssignment = { d: dB, t: tB, name: instA.name };
+                                    this.state.optimizationCount = totalSwaps;
+                                    this.render();
+                                    await new Promise(r => setTimeout(r, 40));
+                                }
+                            } else {
+                                // Revert
+                                instA.assignments = instA_assignments_orig;
+                                instB.assignments = instB_assignments_orig;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this.state.activeAssignment = null;
+        this.state.optimizationCount = totalSwaps;
+        this.render();
+    }
+
+    getAssignmentQuality(person, d, t) {
+        const { slots } = this.state.config;
+        const schedule = this.state.schedule;
+        let score = (schedule[d][t].length ** 2) * 25;
+
+        if (!schedule[d][t].some(s => s.name !== person.name && s.course === person.course)) score -= 80;
+
+        const tIdx = slots.indexOf(t);
+        const hasAdjacent = person.assignments.some(a => {
+            const [ad, at] = a.split(' ');
+            if (ad !== d || at === t) return false;
+            const atIdx = slots.indexOf(at);
+            return Math.abs(tIdx - atIdx) === 1;
+        });
+
+        if (person.pref === 'Yes' && hasAdjacent) score -= 100;
+        else if (person.pref === 'No' && hasAdjacent) score += 150;
+
+        return score;
+    }
+
     render() {
         // This will be overridden by the UI handler to update the DOM
         if (this.onRender) this.onRender(this.state);
