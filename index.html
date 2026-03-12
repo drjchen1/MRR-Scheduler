@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MRR Dynamic Scheduler | Advanced Staffing</title>
+    <title>Shift Happens | Advanced Staffing</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">MRR Scheduler</h1>
+                <h1 style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">Shift Happens</h1>
                 <p style="font-size: 0.75rem; color: var(--text-muted);">Dynamic Staffing Dashboard</p>
             </div>
             <div class="sidebar-content" id="sidebar-roster">
@@ -74,7 +74,7 @@
                 <div id="landing-stage" class="animate-fade-in" style="max-width: 800px; margin: 40px auto;">
                     <div style="text-align: center; margin-bottom: 40px;">
                         <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--text); margin-bottom: 12px;">
-                            Welcome to MRR Scheduler</h1>
+                            Welcome to Shift Happens</h1>
                         <p style="color: var(--text-muted); font-size: 1.1rem;">Choose how you'd like to begin your
                             scheduling session</p>
                     </div>
@@ -114,6 +114,19 @@
                             <h3 style="margin-bottom: 12px;">Single File Upload</h3>
                             <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Upload a previously saved
                                 or sample-formatted input file.</p>
+                        </div>
+                    
+                    </div>
+
+                                        <div class="glass-card" id="schedule-config" style="margin-top: 32px; padding: 24px;">
+                        <h2 style="margin-bottom: 12px;">Schedule Time Slots</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">Toggle the slots you want per day. Click Add to insert a custom time (HH:MM).</p>
+
+                        <div id="schedule-days" style="display: grid; grid-template-columns: 1fr; gap: 14px;"></div>
+
+                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                            <button class="btn btn-primary" onclick="applySlotConfig()">Apply</button>
+                            <button class="btn btn-ghost" onclick="resetSlotConfig()">Reset Default</button>
                         </div>
                     </div>
 
@@ -181,7 +194,7 @@
                     style="display: none; max-width: 800px; margin: 40px auto;">
                     <div class="glass-card">
                         <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px;">
                             <div style="display: flex; align-items: center; gap: 16px;">
                                 <h2>Data Preview</h2>
                                 <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.8rem;"
@@ -190,10 +203,17 @@
                                     <span>Add Staff</span>
                                 </button>
                             </div>
-                            <button class="btn btn-ghost" onclick="backToLanding()">
-                                <i data-lucide="arrow-left"></i>
-                                Back
-                            </button>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <button class="btn btn-primary" id="make-schedule-btn"
+                                    style="height: 36px; font-size: 0.9rem;">
+                                    <i data-lucide="calendar"></i>
+                                    Make Schedule
+                                </button>
+                                <button class="btn btn-ghost" onclick="backToLanding()">
+                                    <i data-lucide="arrow-left"></i>
+                                    Back
+                                </button>
+                            </div>
                         </div>
                         <p style="margin-bottom: 20px; color: var(--text-muted);">
                             Please verify the extracted instructor data before generating the schedule.
@@ -208,11 +228,6 @@
                                 <i data-lucide="download"></i>
                                 Save This Data
                             </button>
-                            <button class="btn btn-primary" id="make-schedule-btn"
-                                style="flex: 2; justify-content: center; height: 48px; font-size: 1.1rem;">
-                                <i data-lucide="calendar"></i>
-                                Make Schedule
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -221,8 +236,10 @@
                 <div id="schedule-stage" class="hidden animate-fade-in" style="display: none;">
                     <div id="schedule-alerts"
                         style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;"></div>
-                    <div class="schedule-grid" id="main-grid">
-                        <!-- Grid will be generated here -->
+                    <div class="schedule-scroll">
+                        <div class="schedule-grid" id="main-grid">
+                            <!-- Grid will be generated here -->
+                        </div>
                     </div>
                 </div>
 
@@ -288,6 +305,7 @@
     <script src="app.js"></script>
     <script>
         // UI Handler integration for app.js
+        let optimizationBannerShown = false;
         const files = { people: null, mrr: null, teaching: null };
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('file-input');
@@ -295,6 +313,175 @@
         const makeScheduleBtn = document.getElementById('make-schedule-btn');
 
         lucide.createIcons();
+
+
+        const DEFAULT_SLOTS_BY_DAY = {
+            Mon: ['09:30', '10:30', '11:30', '12:30', '13:30', '14:30', '15:30', '16:30'],
+            Tue: ['09:30', '10:30', '11:30', '12:30', '13:30', '14:30', '15:30', '16:30'],
+            Wed: ['09:30', '10:30', '11:30', '12:30', '13:30', '14:30', '15:30', '16:30'],
+            Thu: ['09:30', '10:30', '11:30', '12:30', '13:30', '14:30', '15:30', '16:30'],
+            Fri: ['09:30', '10:30', '11:30', '12:30'],
+            Sat: [],
+            Sun: []
+        };
+        const DAY_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const customSlotsByDay = {};
+
+        function collectUIConfig() {
+            const enabledDays = new Set();
+            const selectedByDay = {};
+
+            document.querySelectorAll('.day-row').forEach(row => {
+                const day = row.getAttribute('data-day');
+                const enabled = row.querySelector('.day-enable')?.checked;
+                if (enabled) enabledDays.add(day);
+
+                const checked = Array.from(row.querySelectorAll('.day-slot'))
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+                selectedByDay[day] = checked;
+            });
+
+            return { enabledDays, selectedByDay };
+        }
+
+        function renderDayRow(day, enabled, selectedSlots, availableSlots) {
+            const row = document.createElement('div');
+            row.className = 'day-row';
+            row.setAttribute('data-day', day);
+            row.style.cssText = 'display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: start;';
+
+            const left = document.createElement('div');
+            left.innerHTML = `<label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="day-enable" data-day="${day}"> ${day}</label>`;
+            const enableCheckbox = left.querySelector('.day-enable');
+            enableCheckbox.checked = enabled;
+
+            const right = document.createElement('div');
+            right.style.cssText = 'display: flex; flex-direction: column; gap: 8px;';
+
+            const options = document.createElement('div');
+            options.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px;';
+
+            availableSlots.forEach(slot => {
+                const label = document.createElement('label');
+                label.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 999px; background: var(--card-bg); font-size: 0.8rem;';
+                label.innerHTML = `<input type="checkbox" class="day-slot" data-day="${day}" value="${slot}"> ${slot}`;
+                const cb = label.querySelector('input');
+                cb.checked = selectedSlots.includes(slot);
+                options.appendChild(label);
+            });
+
+            const addRow = document.createElement('div');
+            addRow.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+            addRow.innerHTML = `<input class="time-add-input" data-day="${day}" type="text" placeholder="HH:MM" style="width: 90px; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg); color: var(--text);">` +
+                `<button class="btn btn-ghost" style="padding: 6px 10px;" onclick="addCustomTime('${day}')">Add</button>`;
+
+            right.appendChild(options);
+            const setEnabledState = (isEnabled) => {
+                options.querySelectorAll('input.day-slot').forEach(cb => { cb.disabled = !isEnabled; });
+                const input = addRow.querySelector('.time-add-input');
+                const button = addRow.querySelector('button');
+                if (input) input.disabled = !isEnabled;
+                if (button) button.disabled = !isEnabled;
+                right.style.opacity = isEnabled ? '1' : '0.5';
+            };
+            setEnabledState(enableCheckbox.checked);
+            enableCheckbox.addEventListener('change', () => setEnabledState(enableCheckbox.checked));
+
+            right.appendChild(addRow);
+
+            row.appendChild(left);
+            row.appendChild(right);
+            return row;
+        }
+
+        function loadConfigToUI(override) {
+            const state = window.scheduler.state;
+            const days = state.config.days || Object.keys(DEFAULT_SLOTS_BY_DAY);
+            const slotsByDay = state.config.slotsByDay || {};
+
+            const enabledDays = override?.enabledDays || new Set(days);
+            const selectedByDay = override?.selectedByDay || slotsByDay;
+
+            const container = document.getElementById('schedule-days');
+            if (!container) return;
+            container.innerHTML = '';
+
+            DAY_ORDER.forEach(day => {
+                const isEnabled = enabledDays.has(day);
+                const selected = selectedByDay[day] || slotsByDay[day] || DEFAULT_SLOTS_BY_DAY[day] || [];
+
+                const custom = customSlotsByDay[day] || [];
+                const available = Array.from(new Set([
+                    ...(DEFAULT_SLOTS_BY_DAY[day] || []),
+                    ...(slotsByDay[day] || []),
+                    ...selected,
+                    ...custom
+                ])).sort();
+
+                const row = renderDayRow(day, isEnabled, selected, available);
+                container.appendChild(row);
+            });
+        }
+
+        function addCustomTime(day) {
+            const input = document.querySelector(`.time-add-input[data-day="${day}"]`);
+            const value = String(input?.value || '').trim();
+            if (!/^\d{2}:\d{2}$/.test(value)) {
+                alert('Please enter a valid time in HH:MM (24-hour) format.');
+                return;
+            }
+
+            const { enabledDays, selectedByDay } = collectUIConfig();
+            customSlotsByDay[day] = customSlotsByDay[day] || [];
+            if (!customSlotsByDay[day].includes(value)) customSlotsByDay[day].push(value);
+            selectedByDay[day] = Array.from(new Set([...(selectedByDay[day] || []), value]));
+
+            loadConfigToUI({ enabledDays, selectedByDay });
+        }
+
+        function applySlotConfig() {
+            const { enabledDays, selectedByDay } = collectUIConfig();
+            const dayValues = Array.from(enabledDays).sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
+
+            if (!dayValues.length) {
+                alert('Please select at least one day.');
+                return;
+            }
+
+            const slotsByDay = {};
+            for (const day of dayValues) {
+                const slots = selectedByDay[day] || [];
+                if (!slots.length) {
+                    alert(`Please select at least one slot for ${day}.`);
+                    return;
+                }
+                slotsByDay[day] = slots;
+            }
+
+            const hadSchedule = window.scheduler.state.schedule && Object.keys(window.scheduler.state.schedule).length > 0;
+            if (hadSchedule) {
+                if (!confirm('Changing time slots will clear the current schedule. Continue?')) return;
+            }
+
+            window.scheduler.setScheduleConfig(dayValues, [], slotsByDay);
+
+            if (window.scheduler.state.instructors.length > 0) {
+                window.scheduler.onPreview(window.scheduler.state);
+            } else {
+                backToLanding();
+            }
+        }
+
+        function resetSlotConfig() {
+            const enabledDays = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
+            const selectedByDay = { ...DEFAULT_SLOTS_BY_DAY };
+            Object.keys(customSlotsByDay).forEach(k => delete customSlotsByDay[k]);
+            loadConfigToUI({ enabledDays, selectedByDay });
+            applySlotConfig();
+        }
+
+        loadConfigToUI();
 
         // --- Navigation ---
         function showTripleUpload() {
@@ -375,9 +562,10 @@
 
         function handleFiles(fileList) {
             Array.from(fileList).forEach(file => {
-                if (file.name.includes('people')) files.people = file;
-                if (file.name.includes('mrr')) files.mrr = file;
-                if (file.name.includes('teaching')) files.teaching = file;
+                const lower = file.name.toLowerCase();
+                if (lower.includes('people')) files.people = file;
+                if (lower.includes('mrr')) files.mrr = file;
+                if (lower.includes('teaching')) files.teaching = file;
             });
             updateFileList();
         }
@@ -413,11 +601,16 @@
 
         if (makeScheduleBtn) {
             makeScheduleBtn.onclick = async () => {
+                document.getElementById('landing-stage').style.display = 'none';
+                document.getElementById('upload-stage').style.display = 'none';
+                document.getElementById('single-upload-stage').style.display = 'none';
                 document.getElementById('preview-stage').style.display = 'none';
                 document.getElementById('schedule-stage').style.display = 'block';
                 makeScheduleBtn.disabled = true;
                 makeScheduleBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i><span>Generating...</span>';
                 lucide.createIcons();
+
+                optimizationBannerShown = false;
 
                 await window.scheduler.runScheduler();
 
@@ -588,11 +781,31 @@
         // --- Scheduler UI Integration ---
         window.scheduler.onRender = (state) => {
             const grid = document.getElementById('main-grid');
+            const hasSchedule = state.schedule && Object.keys(state.schedule).length > 0;
+            if (hasSchedule) {
+                const landing = document.getElementById('landing-stage');
+                const upload = document.getElementById('upload-stage');
+                const single = document.getElementById('single-upload-stage');
+                const preview = document.getElementById('preview-stage');
+                const schedule = document.getElementById('schedule-stage');
+                if (landing) landing.style.display = 'none';
+                if (upload) upload.style.display = 'none';
+                if (single) single.style.display = 'none';
+                if (preview) preview.style.display = 'none';
+                if (schedule) schedule.style.display = 'block';
+            }
             const roster = document.getElementById('sidebar-roster');
-            const { days, slots, coreCourses } = state.config;
+            const { days, slots, coreCourses, slotsByDay } = state.config;
+
+            const allSlots = window.scheduler.getAllSlots ? window.scheduler.getAllSlots() : (slots || []);
+            const isSlotActive = (day, time) => {
+                const list = (slotsByDay && slotsByDay[day]) || slots || [];
+                return list.includes(time);
+            };
 
             // Render Roster
-            roster.innerHTML = state.instructors.sort((a, b) => a.name.localeCompare(b.name)).map(inst => {
+            const rosterList = [...state.instructors].sort((a, b) => a.name.localeCompare(b.name));
+            roster.innerHTML = rosterList.map(inst => {
                 const assignments = inst.assignments || [];
                 const required = inst.required || 0;
                 const assigned = assignments.length;
@@ -607,7 +820,8 @@
                     const daysMap = {};
                     assignments.forEach(a => {
                         const [d, t] = a.split(' ');
-                        (daysMap[d] = daysMap[d] || []).push(window.scheduler.state.config.slots.indexOf(t));
+                        const slotsForDay = (slotsByDay && slotsByDay[d]) || window.scheduler.state.config.slots;
+                        (daysMap[d] = daysMap[d] || []).push(slotsForDay.indexOf(t));
                     });
 
                     let hasAdjacent = false;
@@ -667,11 +881,11 @@
             grid.style.gridTemplateColumns = `80px repeat(${days.length}, 1fr)`;
             grid.innerHTML = '<div class="grid-header">Time</div>' + days.map(d => `<div class="grid-header"> ${d}</div> `).join('');
 
-            slots.forEach(t => {
+            allSlots.forEach(t => {
                 grid.innerHTML += `<div class="grid-time"> ${t}</div> `;
                 days.forEach(d => {
-                    const isFriPM = d === 'Fri' && (parseInt(t) >= 13);
-                    if (isFriPM) {
+                    const isActive = isSlotActive(d, t);
+                    if (!isActive) {
                         grid.innerHTML += `<div class="grid-cell" style="background: var(--border); opacity: 0.3;"></div> `;
                     } else {
                         const slotId = `${d} ${t}`;
@@ -716,12 +930,13 @@
                 });
             });
 
+            renderScheduleSummary(state);
             updateMRRClaims();
             refreshGaps(state);
             refreshHoursWarnings(state);
 
             // Optimization Feedback
-            if (state.optimizationCount > 0) {
+            if (!optimizationBannerShown && state.optimizationCount > 0) {
                 const alerts = document.getElementById('schedule-alerts');
                 if (alerts) {
                     const isDone = !state.activeAssignment;
@@ -744,6 +959,7 @@
                     lucide.createIcons();
 
                     if (isDone) {
+                        optimizationBannerShown = true;
                         setTimeout(() => {
                             const finalAlert = document.getElementById(alertId);
                             if (finalAlert) finalAlert.classList.replace('animate-fade-in', 'animate-fade-out');
@@ -993,6 +1209,115 @@
                     tag.innerText = claims.length > 0 ? `MRR / ${claims.join(', ')} ` : 'MRR/Gen';
                 });
             });
+        }
+
+
+        function renderScheduleSummary(state) {
+            const alertArea = document.getElementById('schedule-alerts');
+            if (!alertArea) return;
+
+            const { days, slots, slotsByDay, coreCourses } = state.config;
+            const allSlots = window.scheduler.getAllSlots ? window.scheduler.getAllSlots() : (slots || []);
+            const isSlotActive = (day, time) => {
+                const list = (slotsByDay && slotsByDay[day]) || slots || [];
+                return list.includes(time);
+            };
+
+            // Coverage gaps (missing core with no MRR)
+            let activeSlots = 0;
+            let gaps = 0;
+            const slotCounts = [];
+
+            allSlots.forEach(t => {
+                days.forEach(d => {
+                    if (!isSlotActive(d, t)) return;
+                    activeSlots++;
+                    const entries = state.schedule[d]?.[t] || [];
+                    slotCounts.push(entries.length);
+
+                    if (coreCourses && coreCourses.length) {
+                        const primaries = entries.filter(e => e.dataset ? e.dataset.mrr === 'false' : !e.isMRR).map(e => e.dataset ? e.dataset.course : e.course);
+                        const normPrimaries = primaries.map(p => normalizeCourse(p));
+                        const missing = coreCourses.filter(c => {
+                            const nc = normalizeCourse(c);
+                            return !normPrimaries.some(np => np.includes(nc) || nc.includes(np));
+                        });
+                        const hasMRR = entries.some(e => e.dataset ? e.dataset.mrr === 'true' : e.isMRR);
+                        if (missing.length > 0 && !hasMRR) gaps++;
+                    }
+                });
+            });
+
+            const coverageScore = activeSlots ? Math.max(0, Math.round(100 - (gaps / activeSlots) * 100)) : 100;
+
+            // Assignment completeness
+            const totalStaff = state.instructors.length || 1;
+            const fullyAssigned = state.instructors.filter(i => (i.assigned || 0) === (i.required || 0)).length;
+            const assignmentScore = Math.round((fullyAssigned / totalStaff) * 100);
+
+            // B2B satisfaction
+            let b2bTotal = 0;
+            let b2bSatisfied = 0;
+            const byDaySlots = (day) => (slotsByDay && slotsByDay[day]) || slots || [];
+
+            state.instructors.forEach(inst => {
+                const required = inst.required || 0;
+                const prefRaw = (inst.pref || "").trim().toLowerCase();
+                const wantsB2B = prefRaw.includes('yes');
+                const avoidsB2B = prefRaw.includes('no') && !prefRaw.includes('preference');
+                if (required <= 1 || !(wantsB2B || avoidsB2B)) return;
+
+                b2bTotal++;
+                const daysMap = {};
+                (inst.assignments || []).forEach(a => {
+                    const [d, t] = a.split(' ');
+                    (daysMap[d] = daysMap[d] || []).push(byDaySlots(d).indexOf(t));
+                });
+                let hasAdjacent = false;
+                Object.values(daysMap).forEach(idxs => {
+                    idxs.sort((a, b) => a - b);
+                    for (let i = 0; i < idxs.length - 1; i++) {
+                        if (idxs[i + 1] - idxs[i] === 1) hasAdjacent = true;
+                    }
+                });
+                if (wantsB2B && hasAdjacent) b2bSatisfied++;
+                if (avoidsB2B && !hasAdjacent) b2bSatisfied++;
+            });
+
+            const b2bScore = b2bTotal ? Math.round((b2bSatisfied / b2bTotal) * 100) : 100;
+
+            // Balance score (lower stddev = better)
+            let balanceScore = 100;
+            if (slotCounts.length > 0) {
+                const avg = slotCounts.reduce((a, b) => a + b, 0) / slotCounts.length;
+                const variance = slotCounts.reduce((a, b) => a + (b - avg) ** 2, 0) / slotCounts.length;
+                const stddev = Math.sqrt(variance);
+                balanceScore = Math.max(0, Math.round(100 - stddev * 25));
+            }
+
+            const overall = Math.round(
+                coverageScore * 0.4 +
+                assignmentScore * 0.3 +
+                b2bScore * 0.2 +
+                balanceScore * 0.1
+            );
+
+            let summary = document.getElementById('schedule-summary');
+            if (!summary) {
+                summary = document.createElement('div');
+                summary.id = 'schedule-summary';
+                summary.className = 'glass-card';
+                summary.style.cssText = 'padding: 12px 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap;';
+                alertArea.prepend(summary);
+            }
+
+            summary.innerHTML = `
+                <div style="font-weight: 800; font-size: 1rem;">Schedule Score: ${overall}</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Coverage: ${coverageScore}% (gaps: ${gaps})</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Assignments: ${assignmentScore}%</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">B2B satisfied: ${b2bScore}%</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Balance: ${balanceScore}%</div>
+            `;
         }
 
         function refreshGaps(state) {
@@ -1279,7 +1604,7 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MRR Schedule Export - ${new Date().toLocaleDateString()}</title>
+    <title>Shift Happens Export - ${new Date().toLocaleDateString()}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
@@ -1296,7 +1621,7 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `MRR_Schedule_${exportFull ? 'Full_' : ''}${new Date().toISOString().slice(0, 10)}.html`;
+            a.download = `Shift_Happens_${exportFull ? 'Full_' : ''}${new Date().toISOString().slice(0, 10)}.html`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -1306,6 +1631,8 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
             heatmapActive = !heatmapActive;
             const state = window.scheduler.state;
             const totalStaff = state.instructors.length;
+
+            if (!totalStaff) return;
 
             document.querySelectorAll('.grid-cell[id]').forEach(cell => {
                 cell.className = 'grid-cell'; // Reset

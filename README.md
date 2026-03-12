@@ -1,6 +1,6 @@
-# 🗓️ MRR Scheduler
+# 🗓️ Shift Happens
 
-The MRR Scheduler is an intelligent, dynamic web-based staffing and scheduling dashboard designed to streamline clinical and academic rosters. It effortlessly combines multiple CSV datasets into a single, conflict-free, optimized schedule with an intuitive live-editing interface.
+Shift Happens is an intelligent, dynamic web-based staffing and scheduling dashboard designed to streamline clinical and academic rosters. It effortlessly combines multiple CSV datasets into a single, conflict-free, optimized schedule with an intuitive live-editing interface.
 
 This project was built entirely using vanilla **HTML**, **CSS**, and **JavaScript**, making it incredibly lightweight and completely safe to run entirely within your modern browser without needing a backend server. 
 
@@ -17,7 +17,7 @@ This project was built entirely using vanilla **HTML**, **CSS**, and **JavaScrip
 
 ## 🚀 Getting Started
 
-Because the MRR Scheduler is completely client-side, setup is instantaneous.
+Because Shift Happens is completely client-side, setup is instantaneous.
 
 ### Option 1: Live Demo (No installation required)
 Simply clone the repository and open the `index.html` file in any modern web browser (Chrome, Firefox, Safari, Edge).
@@ -25,11 +25,11 @@ Simply clone the repository and open the `index.html` file in any modern web bro
 ### Option 2: Running Locally
 1. Clone the repository:
    ```bash
-   git clone https://github.com/drjchen1/MRR-Scheduler.git
+   git clone https://github.com/drjchen1/Shift-Happens.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd MRR-Scheduler/app
+   cd Shift-Happens/app
    ```
 3. Open `index.html` in your browser.
 
@@ -55,7 +55,7 @@ The scheduler supports three flexible entry options to fit your workflow:
 - **Lucide Icons** (UI Iconography)
 
 ## 📖 Help & Documentation
-Detailed operational guides and explanations of the internal algorithm are available in the included `MRR_Scheduler_Help.html` file. 
+Detailed operational guides and explanations of the internal algorithm are available in the included `Shift_Happens_Help.html` file. 
 
 ## 📝 License
 This project is open-source. Feel free to fork, modify, and use it to tame your own scheduling nightmares!

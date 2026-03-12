@@ -173,6 +173,16 @@ body {
     overflow: hidden;
 }
 
+.schedule-scroll {
+    max-height: calc(100vh - 220px);
+    overflow: auto;
+}
+
+.full-view-mode .schedule-scroll {
+    max-height: none;
+    overflow: auto;
+}
+
 .grid-header {
     background: var(--primary);
     color: white;
@@ -369,7 +379,7 @@ body {
 
 .full-view-mode .content-body {
     padding: 4px;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .full-view-mode .schedule-grid {
