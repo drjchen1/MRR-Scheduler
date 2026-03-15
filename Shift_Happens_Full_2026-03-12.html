@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Happens Export - 3/11/2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <style>:root {
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --background: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --accent: #ec4899;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --sidebar-width: 320px;
+    --glass: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --radius: 12px;
+}
+[data-theme="dark"] {
+    --background: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.8);
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --glass: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 24px;
+    overflow: auto;
+    height: auto;
+}
+.schedule-grid {
+    display: grid !important;
+    grid-template-columns: 80px repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 1400px;
+}
+.grid-header {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+.grid-time {
+    background: var(--background);
+    padding: 12px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border);
+}
+.grid-cell {
+    background: var(--card-bg);
+    min-height: 120px;
+    padding: 8px;
+}
+.staff-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.course-badge {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.staff-name {
+    font-weight: 700;
+}
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+div[style*="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;"] {
+    display: flex !important;
+}
+
+body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
+.full-view-mode .schedule-grid {
+    height: 100%;
+    max-width: none;
+    grid-template-rows: 32px repeat(8, 1fr);
+}
+.full-view-mode .grid-header { padding: 2px; font-size: 11px; }
+.full-view-mode .grid-time { padding: 2px; font-size: 10px; }
+.full-view-mode .grid-cell {
+    min-height: 0;
+    padding: 2px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.full-view-mode .staff-card {
+    padding: 1px 2px;
+    margin-bottom: 0;
+    font-size: 9px;
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+.full-view-mode .staff-card-header {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+}
+.full-view-mode .course-badge { font-size: 7px; flex-shrink: 0; }
+.full-view-mode .staff-name {
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.full-view-mode .staff-card strong { display: none; }
+.full-view-mode .staff-card div:not(.staff-card-header) { display: none !important; }
+</style>
+</head>
+<body class="full-view-mode">
+    <div class="schedule-grid" id="main-grid">
+        <div class="grid-header">Time</div><div class="grid-header"> Mon</div> <div class="grid-header"> Tue</div> <div class="grid-header"> Wed</div> <div class="grid-header"> Thu</div> <div class="grid-header"> Fri</div> <div class="grid-time"> 09:30</div> 
+                            <div class="grid-cell" id="Mon 09:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16100, MA 16200 </span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16600 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Paige Turner')" onmouseleave="clearHighlights()" data-name="Paige Turner" data-course="MA 16020" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16020</span>
+                                        <span class="staff-name">Paige Turner</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ben There')" onmouseleave="clearHighlights()" data-name="Ben There" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ben There</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Will Power')" onmouseleave="clearHighlights()" data-name="Will Power" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Will Power</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Tue 09:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Chris Cross')" onmouseleave="clearHighlights()" data-name="Chris Cross" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Chris Cross</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Barry Cade')" onmouseleave="clearHighlights()" data-name="Barry Cade" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16200, MA 26100 </span>
+                                        <span class="staff-name">Barry Cade</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16600 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Wed 09:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Artie Choke')" onmouseleave="clearHighlights()" data-name="Artie Choke" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Artie Choke</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Dan D. Lyon')" onmouseleave="clearHighlights()" data-name="Dan D. Lyon" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Dan D. Lyon</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010, MA 16020 </span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16100, MA 16200 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Robin Banks')" onmouseleave="clearHighlights()" data-name="Robin Banks" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Robin Banks</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Thu 09:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Lee King')" onmouseleave="clearHighlights()" data-name="Lee King" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Lee King</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Penny Less')" onmouseleave="clearHighlights()" data-name="Penny Less" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Penny Less</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sarah Bellum')" onmouseleave="clearHighlights()" data-name="Sarah Bellum" data-course="MA 16020" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16020</span>
+                                        <span class="staff-name">Sarah Bellum</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Will Power')" onmouseleave="clearHighlights()" data-name="Will Power" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16100, MA 16600 </span>
+                                        <span class="staff-name">Will Power</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Fri 09:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rainy Day')" onmouseleave="clearHighlights()" data-name="Rainy Day" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Rainy Day</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Olive Branch')" onmouseleave="clearHighlights()" data-name="Olive Branch" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Olive Branch</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Will Power')" onmouseleave="clearHighlights()" data-name="Will Power" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16200 </span>
+                                        <span class="staff-name">Will Power</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        <div class="grid-time"> 10:30</div> 
+                            <div class="grid-cell" id="Mon 10:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Carrie O'Kee')" onmouseleave="clearHighlights()" data-name="Carrie O'Kee" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Carrie O'Kee</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ella Vader')" onmouseleave="clearHighlights()" data-name="Ella Vader" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ella Vader</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ivy League')" onmouseleave="clearHighlights()" data-name="Ivy League" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Ivy League</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Tue 10:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Chris Cross')" onmouseleave="clearHighlights()" data-name="Chris Cross" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Chris Cross</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tess T. Tube')" onmouseleave="clearHighlights()" data-name="Tess T. Tube" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Tess T. Tube</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Barry Cade')" onmouseleave="clearHighlights()" data-name="Barry Cade" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 26100, MA 16600 </span>
+                                        <span class="staff-name">Barry Cade</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Wed 10:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Dan D. Lyon')" onmouseleave="clearHighlights()" data-name="Dan D. Lyon" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Dan D. Lyon</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Artie Choke')" onmouseleave="clearHighlights()" data-name="Artie Choke" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Artie Choke</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Manny Kinn')" onmouseleave="clearHighlights()" data-name="Manny Kinn" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Manny Kinn</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Thu 10:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16010, MA 16020 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16100, MA 16600 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Al Gebra')" onmouseleave="clearHighlights()" data-name="Al Gebra" data-course="MA 15800" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 15800</span>
+                                        <span class="staff-name">Al Gebra</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Lee King')" onmouseleave="clearHighlights()" data-name="Lee King" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Lee King</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Penny Less')" onmouseleave="clearHighlights()" data-name="Penny Less" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Penny Less</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Fri 10:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Robin Banks')" onmouseleave="clearHighlights()" data-name="Robin Banks" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Robin Banks</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rainy Day')" onmouseleave="clearHighlights()" data-name="Rainy Day" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Rainy Day</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Meg A. Byte')" onmouseleave="clearHighlights()" data-name="Meg A. Byte" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Meg A. Byte</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        <div class="grid-time"> 11:30</div> 
+                            <div class="grid-cell" id="Mon 11:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Carrie O'Kee')" onmouseleave="clearHighlights()" data-name="Carrie O'Kee" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Carrie O'Kee</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16600 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Herb Al Tea')" onmouseleave="clearHighlights()" data-name="Herb Al Tea" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Herb Al Tea</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Tue 11:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Hope Less')" onmouseleave="clearHighlights()" data-name="Hope Less" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Hope Less</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tess T. Tube')" onmouseleave="clearHighlights()" data-name="Tess T. Tube" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Tess T. Tube</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Hy Gloss')" onmouseleave="clearHighlights()" data-name="Hy Gloss" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Hy Gloss</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Wed 11:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Manny Kinn')" onmouseleave="clearHighlights()" data-name="Manny Kinn" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Manny Kinn</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ben There')" onmouseleave="clearHighlights()" data-name="Ben There" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ben There</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010, MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Artie Choke')" onmouseleave="clearHighlights()" data-name="Artie Choke" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Artie Choke</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Dan D. Lyon')" onmouseleave="clearHighlights()" data-name="Dan D. Lyon" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Dan D. Lyon</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Thu 11:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ray Dio')" onmouseleave="clearHighlights()" data-name="Ray Dio" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ray Dio</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Quinton Tuple')" onmouseleave="clearHighlights()" data-name="Quinton Tuple" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Quinton Tuple</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16200 </span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Fri 11:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Meg A. Byte')" onmouseleave="clearHighlights()" data-name="Meg A. Byte" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Meg A. Byte</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Phil Inblanks')" onmouseleave="clearHighlights()" data-name="Phil Inblanks" data-course="MA 16010" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16010</span>
+                                        <span class="staff-name">Phil Inblanks</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rainy Day')" onmouseleave="clearHighlights()" data-name="Rainy Day" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Rainy Day</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ella Vader')" onmouseleave="clearHighlights()" data-name="Ella Vader" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ella Vader</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        <div class="grid-time"> 12:30</div> 
+                            <div class="grid-cell" id="Mon 12:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16200 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16600 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Herb Al Tea')" onmouseleave="clearHighlights()" data-name="Herb Al Tea" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Herb Al Tea</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Justin Time')" onmouseleave="clearHighlights()" data-name="Justin Time" data-course="MA 16100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16100</span>
+                                        <span class="staff-name">Justin Time</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Tue 12:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Hy Gloss')" onmouseleave="clearHighlights()" data-name="Hy Gloss" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Hy Gloss</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Una Versity')" onmouseleave="clearHighlights()" data-name="Una Versity" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Una Versity</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010, MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Barb Dwyer')" onmouseleave="clearHighlights()" data-name="Barb Dwyer" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Barb Dwyer</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Wed 12:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ben There')" onmouseleave="clearHighlights()" data-name="Ben There" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ben There</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Gene Pool')" onmouseleave="clearHighlights()" data-name="Gene Pool" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Gene Pool</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Will Power')" onmouseleave="clearHighlights()" data-name="Will Power" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Will Power</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16600 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Gladys Over')" onmouseleave="clearHighlights()" data-name="Gladys Over" data-course="MA 16100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16100</span>
+                                        <span class="staff-name">Gladys Over</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Thu 12:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Jay Walker')" onmouseleave="clearHighlights()" data-name="Jay Walker" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Jay Walker</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010, MA 16020 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Quinton Tuple')" onmouseleave="clearHighlights()" data-name="Quinton Tuple" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Quinton Tuple</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16100, MA 16200 </span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Fri 12:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Zeke End')" onmouseleave="clearHighlights()" data-name="Zeke End" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Zeke End</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rose Bush')" onmouseleave="clearHighlights()" data-name="Rose Bush" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010, MA 16020, MA 16200 </span>
+                                        <span class="staff-name">Rose Bush</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Robin Banks')" onmouseleave="clearHighlights()" data-name="Robin Banks" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Robin Banks</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Earl E. Bird')" onmouseleave="clearHighlights()" data-name="Earl E. Bird" data-course="MA 16100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16100</span>
+                                        <span class="staff-name">Earl E. Bird</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Lee King')" onmouseleave="clearHighlights()" data-name="Lee King" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Lee King</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        <div class="grid-time"> 13:30</div> 
+                            <div class="grid-cell" id="Mon 13:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Justin Time')" onmouseleave="clearHighlights()" data-name="Justin Time" data-course="MA 16100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16100</span>
+                                        <span class="staff-name">Justin Time</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ivy League')" onmouseleave="clearHighlights()" data-name="Ivy League" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Ivy League</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16200 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ray Dio')" onmouseleave="clearHighlights()" data-name="Ray Dio" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ray Dio</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Tue 13:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ella Vader')" onmouseleave="clearHighlights()" data-name="Ella Vader" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ella Vader</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010, MA 16100, MA 16600 </span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Rita Book')" onmouseleave="clearHighlights()" data-name="Rita Book" data-course="MA 16020" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16020</span>
+                                        <span class="staff-name">Rita Book</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sam Pull')" onmouseleave="clearHighlights()" data-name="Sam Pull" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Sam Pull</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Una Versity')" onmouseleave="clearHighlights()" data-name="Una Versity" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Una Versity</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Wed 13:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('June Bugg')" onmouseleave="clearHighlights()" data-name="June Bugg" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">June Bugg</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Barb Dwyer')" onmouseleave="clearHighlights()" data-name="Barb Dwyer" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Barb Dwyer</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Gene Pool')" onmouseleave="clearHighlights()" data-name="Gene Pool" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Gene Pool</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010, MA 16020 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Gladys Over')" onmouseleave="clearHighlights()" data-name="Gladys Over" data-course="MA 16100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16100</span>
+                                        <span class="staff-name">Gladys Over</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Thu 13:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Jay Walker')" onmouseleave="clearHighlights()" data-name="Jay Walker" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Jay Walker</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Stan D. Liver')" onmouseleave="clearHighlights()" data-name="Stan D. Liver" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Stan D. Liver</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Quinton Tuple')" onmouseleave="clearHighlights()" data-name="Quinton Tuple" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Quinton Tuple</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        <div class="grid-cell" style="background: var(--border); opacity: 0.3;"></div> <div class="grid-time"> 14:30</div> 
+                            <div class="grid-cell" id="Mon 14:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Barry Cade')" onmouseleave="clearHighlights()" data-name="Barry Cade" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Barry Cade</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Gena Rosity')" onmouseleave="clearHighlights()" data-name="Gena Rosity" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Gena Rosity</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ray Dio')" onmouseleave="clearHighlights()" data-name="Ray Dio" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Ray Dio</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Hope Less')" onmouseleave="clearHighlights()" data-name="Hope Less" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Hope Less</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Tue 14:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sam Pull')" onmouseleave="clearHighlights()" data-name="Sam Pull" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Sam Pull</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Earl E. Bird')" onmouseleave="clearHighlights()" data-name="Earl E. Bird" data-course="MA 16100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16100</span>
+                                        <span class="staff-name">Earl E. Bird</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16020, MA 26100 </span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Otto Grade')" onmouseleave="clearHighlights()" data-name="Otto Grade" data-course="MA 16010" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16010</span>
+                                        <span class="staff-name">Otto Grade</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Barb Dwyer')" onmouseleave="clearHighlights()" data-name="Barb Dwyer" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Barb Dwyer</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Wed 14:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ivan Idea')" onmouseleave="clearHighlights()" data-name="Ivan Idea" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Ivan Idea</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('June Bugg')" onmouseleave="clearHighlights()" data-name="June Bugg" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">June Bugg</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Moe Mentum')" onmouseleave="clearHighlights()" data-name="Moe Mentum" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Moe Mentum</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Thu 14:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Kay Sera')" onmouseleave="clearHighlights()" data-name="Kay Sera" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Kay Sera</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Stan D. Liver')" onmouseleave="clearHighlights()" data-name="Stan D. Liver" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Stan D. Liver</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010, MA 16020 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Sue Shi')" onmouseleave="clearHighlights()" data-name="Sue Shi" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16100, MA 16600 </span>
+                                        <span class="staff-name">Sue Shi</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Jay Walker')" onmouseleave="clearHighlights()" data-name="Jay Walker" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Jay Walker</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        <div class="grid-cell" style="background: var(--border); opacity: 0.3;"></div> <div class="grid-time"> 15:30</div> 
+                            <div class="grid-cell" id="Mon 15:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Barry Cade')" onmouseleave="clearHighlights()" data-name="Barry Cade" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Barry Cade</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16600 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Gena Rosity')" onmouseleave="clearHighlights()" data-name="Gena Rosity" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Gena Rosity</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Hy Gloss')" onmouseleave="clearHighlights()" data-name="Hy Gloss" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Hy Gloss</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Tue 15:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Yul B. Sorry')" onmouseleave="clearHighlights()" data-name="Yul B. Sorry" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Yul B. Sorry</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Chris Cross')" onmouseleave="clearHighlights()" data-name="Chris Cross" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Chris Cross</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Olive Branch')" onmouseleave="clearHighlights()" data-name="Olive Branch" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Olive Branch</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Moe Mentum')" onmouseleave="clearHighlights()" data-name="Moe Mentum" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Moe Mentum</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Wed 15:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Herb Al Tea')" onmouseleave="clearHighlights()" data-name="Herb Al Tea" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Herb Al Tea</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Zeke End')" onmouseleave="clearHighlights()" data-name="Zeke End" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Zeke End</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ivan Idea')" onmouseleave="clearHighlights()" data-name="Ivan Idea" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Ivan Idea</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Thu 15:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Will Power')" onmouseleave="clearHighlights()" data-name="Will Power" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Will Power</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Constance Variable')" onmouseleave="clearHighlights()" data-name="Constance Variable" data-course="MA 16100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16100</span>
+                                        <span class="staff-name">Constance Variable</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Kay Sera')" onmouseleave="clearHighlights()" data-name="Kay Sera" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Kay Sera</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16200 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Moe Mentum')" onmouseleave="clearHighlights()" data-name="Moe Mentum" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Moe Mentum</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        <div class="grid-cell" style="background: var(--border); opacity: 0.3;"></div> <div class="grid-time"> 16:30</div> 
+                            <div class="grid-cell" id="Mon 16:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Barry Cade')" onmouseleave="clearHighlights()" data-name="Barry Cade" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Barry Cade</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16100 </span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Hope Less')" onmouseleave="clearHighlights()" data-name="Hope Less" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Hope Less</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Vic Tree')" onmouseleave="clearHighlights()" data-name="Vic Tree" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16200, MA 26100 </span>
+                                        <span class="staff-name">Vic Tree</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ty Knot')" onmouseleave="clearHighlights()" data-name="Ty Knot" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR/Gen</span>
+                                        <span class="staff-name">Ty Knot</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Tue 16:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Chris Cross')" onmouseleave="clearHighlights()" data-name="Chris Cross" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16020 </span>
+                                        <span class="staff-name">Chris Cross</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Polly Nomia')" onmouseleave="clearHighlights()" data-name="Polly Nomia" data-course="MA 16010" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16010</span>
+                                        <span class="staff-name">Polly Nomia</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Olive Branch')" onmouseleave="clearHighlights()" data-name="Olive Branch" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Olive Branch</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16100, MA 16600 </span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Yul B. Sorry')" onmouseleave="clearHighlights()" data-name="Yul B. Sorry" data-course="MA 16200" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16200</span>
+                                        <span class="staff-name">Yul B. Sorry</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Wed 16:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Zeke End')" onmouseleave="clearHighlights()" data-name="Zeke End" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Zeke End</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Calc U. Lator')" onmouseleave="clearHighlights()" data-name="Calc U. Lator" data-course="MA 16010" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16010</span>
+                                        <span class="staff-name">Calc U. Lator</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tad Pole')" onmouseleave="clearHighlights()" data-name="Tad Pole" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16020 </span>
+                                        <span class="staff-name">Tad Pole</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Russell Sprout')" onmouseleave="clearHighlights()" data-name="Russell Sprout" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16100, MA 16200 </span>
+                                        <span class="staff-name">Russell Sprout</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('June Bugg')" onmouseleave="clearHighlights()" data-name="June Bugg" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">June Bugg</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="grid-cell" id="Thu 16:30" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                                
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Constance Variable')" onmouseleave="clearHighlights()" data-name="Constance Variable" data-course="MA 16100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16100</span>
+                                        <span class="staff-name">Constance Variable</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Ivy League')" onmouseleave="clearHighlights()" data-name="Ivy League" data-course="MA 16600" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 16600</span>
+                                        <span class="staff-name">Ivy League</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Kay Sera')" onmouseleave="clearHighlights()" data-name="Kay Sera" data-course="MA 26100" data-mrr="false">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MA 26100</span>
+                                        <span class="staff-name">Kay Sera</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Chris Cross')" onmouseleave="clearHighlights()" data-name="Chris Cross" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 15800, MA 16010 </span>
+                                        <span class="staff-name">Chris Cross</span>
+                                    </div>
+                                </div>
+                            
+                                <div class="staff-card " draggable="true" ondragstart="handleDragStart(event)" onmouseenter="highlightStaff('Tim Burr')" onmouseleave="clearHighlights()" data-name="Tim Burr" data-course="MRR" data-mrr="true">
+                                    <div class="staff-card-header">
+                                        <span class="course-badge">MRR / MA 16020, MA 16200 </span>
+                                        <span class="staff-name">Tim Burr</span>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        <div class="grid-cell" style="background: var(--border); opacity: 0.3;"></div> 
+    </div>
+</body>
+</html>

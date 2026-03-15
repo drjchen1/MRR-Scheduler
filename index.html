@@ -62,6 +62,10 @@
                             <i data-lucide="maximize" id="fullview-icon"></i>
                             <span>Full View</span>
                         </button>
+                        <button class="btn btn-ghost" onclick="resetToLanding()" title="Reset">
+                            <i data-lucide="rotate-ccw"></i>
+                            <span>Reset</span>
+                        </button>
                         <button class="btn btn-primary" onclick="exportHTML()">
                             <i data-lucide="download"></i>
                             <span>Export Schedule</span>
@@ -483,7 +487,30 @@
 
         loadConfigToUI();
 
-        // --- Navigation ---
+        
+        function resetToLanding() {
+            if (!confirm("Return to the start screen? This will clear the current schedule and uploaded data.")) return;
+            files.people = null;
+            files.mrr = null;
+            files.teaching = null;
+            updateFileList();
+            backToLanding();
+            document.getElementById('schedule-stage').style.display = 'none';
+            const alertArea = document.getElementById('schedule-alerts');
+            if (alertArea) alertArea.innerHTML = '';
+            if (window.scheduler) {
+                window.scheduler.state.schedule = {};
+                window.scheduler.state.history = [];
+                window.scheduler.state.activeAssignment = null;
+                window.scheduler.state.optimizationCount = 0;
+                window.scheduler.state.instructors.forEach(inst => {
+                    inst.assigned = 0;
+                    inst.assignments = [];
+                });
+            }
+        }
+
+// --- Navigation ---
         function showTripleUpload() {
             document.getElementById('landing-stage').style.display = 'none';
             document.getElementById('upload-stage').style.display = 'block';
