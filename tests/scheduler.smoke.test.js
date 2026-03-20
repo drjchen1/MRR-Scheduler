@@ -1,0 +1,226 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+function createScheduler() {
+  const appJsPath = path.join(__dirname, '..', 'app.js');
+  const source = fs.readFileSync(appJsPath, 'utf8');
+
+  const context = {
+    console,
+    setTimeout,
+    clearTimeout,
+    window: {},
+    document: {
+      body: {
+        classList: {
+          contains: () => false
+        }
+      }
+    }
+  };
+
+  vm.createContext(context);
+  vm.runInContext(source, context, { filename: appJsPath });
+  return context.window.scheduler;
+}
+
+function slotId(day, time) {
+  return `${day} ${time}`;
+}
+
+test('runScheduler smoke: no duplicate assignments and no blocked-slot assignments', async () => {
+  const scheduler = createScheduler();
+
+  scheduler.setScheduleConfig(
+    ['Mon', 'Tue'],
+    [],
+    {
+      Mon: ['09:30', '10:30'],
+      Tue: ['09:30', '10:30']
+    }
+  );
+
+  scheduler.state.instructors = [
+    {
+      name: 'Doe, Jane',
+      course: 'MA 16100',
+      sections: 2,
+      unavail: [slotId('Mon', '09:30')],
+      isMRR: false,
+      required: 2,
+      pref: 'No preference',
+      assignments: []
+    },
+    {
+      name: 'Smith, John',
+      course: 'MA 16200',
+      sections: 2,
+      unavail: [slotId('Tue', '10:30')],
+      isMRR: false,
+      required: 2,
+      pref: 'Yes',
+      assignments: []
+    },
+    {
+      name: 'Taylor, Alex',
+      course: 'MRR',
+      sections: 2,
+      unavail: [],
+      isMRR: true,
+      required: 2,
+      pref: 'No',
+      assignments: []
+    }
+  ];
+
+  await scheduler.runScheduler();
+
+  scheduler.state.instructors.forEach((inst) => {
+    const unique = new Set(inst.assignments);
+    assert.equal(unique.size, inst.assignments.length, `${inst.name} has duplicate slot assignments`);
+    inst.assignments.forEach((slot) => {
+      assert.equal(inst.unavail.includes(slot), false, `${inst.name} assigned into blocked slot ${slot}`);
+    });
+  });
+});
+
+test('setScheduleConfig/getAllSlots: custom day-slot shape is preserved', () => {
+  const scheduler = createScheduler();
+
+  scheduler.setScheduleConfig(
+    ['Mon', 'Wed', 'Fri'],
+    [],
+    {
+      Mon: ['09:30', '11:30'],
+      Wed: ['10:30'],
+      Fri: ['08:30', '12:30']
+    }
+  );
+
+  assert.deepEqual([...scheduler.state.config.days], ['Mon', 'Wed', 'Fri']);
+  assert.deepEqual([...scheduler.getSlotsForDay('Mon')], ['09:30', '11:30']);
+  assert.deepEqual([...scheduler.getSlotsForDay('Wed')], ['10:30']);
+  assert.deepEqual([...scheduler.getSlotsForDay('Fri')], ['08:30', '12:30']);
+
+  const allSlots = [...scheduler.getAllSlots()];
+  assert.deepEqual(allSlots, ['08:30', '09:30', '10:30', '11:30', '12:30']);
+});
+
+test('moveStaff and swapStaff keep instructor assignments and schedule cells in sync', () => {
+  const scheduler = createScheduler();
+
+  scheduler.setScheduleConfig(
+    ['Mon'],
+    [],
+    { Mon: ['09:30', '10:30'] }
+  );
+
+  scheduler.state.instructors = [
+    {
+      name: 'Alpha, Ann',
+      course: 'MA 16100',
+      sections: 1,
+      unavail: [],
+      isMRR: false,
+      required: 1,
+      pref: 'No preference',
+      assignments: [slotId('Mon', '09:30')],
+      assigned: 1
+    },
+    {
+      name: 'Beta, Bob',
+      course: 'MRR',
+      sections: 1,
+      unavail: [],
+      isMRR: true,
+      required: 1,
+      pref: 'No preference',
+      assignments: [slotId('Mon', '10:30')],
+      assigned: 1
+    }
+  ];
+
+  scheduler.state.schedule = {
+    Mon: {
+      '09:30': [{ name: 'Alpha, Ann', course: 'MA 16100', isMRR: false }],
+      '10:30': [{ name: 'Beta, Bob', course: 'MRR', isMRR: true }]
+    }
+  };
+  scheduler.saveHistory();
+
+  scheduler.moveStaff('Alpha, Ann', slotId('Mon', '09:30'), slotId('Mon', '10:30'));
+  const alpha = scheduler.state.instructors.find((i) => i.name === 'Alpha, Ann');
+  assert(alpha.assignments.includes(slotId('Mon', '10:30')));
+  assert.equal(alpha.assignments.includes(slotId('Mon', '09:30')), false);
+  assert.equal(
+    scheduler.state.schedule.Mon['10:30'].some((s) => s.name === 'Alpha, Ann'),
+    true
+  );
+
+  // Reset to clean one-person-per-slot state for swap validation.
+  alpha.assignments = [slotId('Mon', '09:30')];
+  alpha.assigned = 1;
+  const beta = scheduler.state.instructors.find((i) => i.name === 'Beta, Bob');
+  beta.assignments = [slotId('Mon', '10:30')];
+  beta.assigned = 1;
+  scheduler.state.schedule = {
+    Mon: {
+      '09:30': [{ name: 'Alpha, Ann', course: 'MA 16100', isMRR: false }],
+      '10:30': [{ name: 'Beta, Bob', course: 'MRR', isMRR: true }]
+    }
+  };
+
+  scheduler.swapStaff('Alpha, Ann', slotId('Mon', '09:30'), 'Beta, Bob', slotId('Mon', '10:30'));
+  assert.equal(
+    scheduler.state.schedule.Mon['09:30'].some((s) => s.name === 'Alpha, Ann'),
+    false
+  );
+  assert.equal(
+    scheduler.state.schedule.Mon['10:30'].some((s) => s.name === 'Beta, Bob'),
+    false
+  );
+  assert.equal(
+    scheduler.state.schedule.Mon['09:30'].some((s) => s.name === 'Beta, Bob'),
+    true
+  );
+  assert.equal(
+    scheduler.state.schedule.Mon['10:30'].some((s) => s.name === 'Alpha, Ann'),
+    true
+  );
+});
+
+test('processSingleFile parses required fields and normalizes preferences', async () => {
+  const scheduler = createScheduler();
+
+  const rows = [
+    {
+      Instructor: 'Gamma, Gia',
+      Course: 'MRR / MA 16100',
+      Sections: '3',
+      'Back-to-Back Preference': 'yes please',
+      'Total Unavailability': 'Mon 09:30, Tue 10:30'
+    },
+    {
+      Name: 'Delta, Dan',
+      course: 'MA 16200',
+      sections: '2',
+      pref: 'No preference',
+      unavailability: ''
+    }
+  ];
+
+  await scheduler.processSingleFile(rows);
+
+  assert.equal(scheduler.state.instructors.length, 2);
+  assert.equal(scheduler.state.instructors[0].isMRR, true);
+  assert.equal(scheduler.state.instructors[0].required, 3);
+  assert.equal(scheduler.state.instructors[0].pref, 'Yes');
+  assert.deepEqual([...scheduler.state.instructors[0].unavail], ['Mon 09:30', 'Tue 10:30']);
+
+  assert.equal(scheduler.state.instructors[1].isMRR, false);
+  assert.equal(scheduler.state.instructors[1].required, 2);
+  assert.equal(scheduler.state.instructors[1].pref, 'No preference');
+});

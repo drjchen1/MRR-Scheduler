@@ -588,13 +588,38 @@
         }
 
         function handleFiles(fileList) {
+            const detectFileType = (filename) => {
+                const lower = String(filename || '').toLowerCase().trim();
+                const base = lower.replace(/\.[^.]+$/, '');
+                const tokens = base.split(/[^a-z0-9]+/).filter(Boolean);
+
+                const matches = [];
+                if (tokens.includes('people') || tokens.includes('survey')) matches.push('people');
+                if (tokens.includes('mrr')) matches.push('mrr');
+                if (tokens.includes('teaching') || tokens.includes('teach') || tokens.includes('section') || tokens.includes('sections')) matches.push('teaching');
+
+                if (matches.length === 1) return matches[0];
+
+                // Fallback for common exact naming when tokenization is unusual.
+                if (/^people(\.csv)?$/.test(lower)) return 'people';
+                if (/^mrr(\.csv)?$/.test(lower)) return 'mrr';
+                if (/^teaching(\.csv)?$/.test(lower)) return 'teaching';
+                return null;
+            };
+
+            const unrecognized = [];
             Array.from(fileList).forEach(file => {
-                const lower = file.name.toLowerCase();
-                if (lower.includes('people')) files.people = file;
-                if (lower.includes('mrr')) files.mrr = file;
-                if (lower.includes('teaching')) files.teaching = file;
+                const type = detectFileType(file.name);
+                if (!type) {
+                    unrecognized.push(file.name);
+                    return;
+                }
+                files[type] = file;
             });
             updateFileList();
+            if (unrecognized.length) {
+                alert(`Could not classify: ${unrecognized.join(', ')}.\nUse filenames containing one clear type keyword: people, mrr, or teaching.`);
+            }
         }
 
         function updateFileList() {
@@ -1459,6 +1484,8 @@
 
             const gridHTML = document.getElementById('main-grid').innerHTML;
             const theme = document.body.getAttribute('data-theme') || 'light';
+            const dayCount = (window.scheduler.state?.config?.days || []).length || 5;
+            const rowCount = (window.scheduler.getAllSlots ? window.scheduler.getAllSlots().length : (window.scheduler.state?.config?.slots || []).length) || 8;
 
             let inlinedCSS = `:root {
     --primary: #6366f1;
@@ -1499,7 +1526,7 @@ body {
 }
 .schedule-grid {
     display: grid !important;
-    grid-template-columns: 80px repeat(5, 1fr);
+    grid-template-columns: 80px repeat(${dayCount}, 1fr);
     gap: 1px;
     background: var(--border);
     border: 1px solid var(--border);
@@ -1566,7 +1593,7 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
 .full-view-mode .schedule-grid {
     height: 100%;
     max-width: none;
-    grid-template-rows: 32px repeat(8, 1fr);
+    grid-template-rows: 32px repeat(${rowCount}, 1fr);
 }
 .full-view-mode .grid-header { padding: 2px; font-size: 11px; }
 .full-view-mode .grid-time { padding: 2px; font-size: 10px; }
@@ -1647,8 +1674,10 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
             const blob = new Blob([content], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
+            const now = new Date();
+            const localDateStamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             a.href = url;
-            a.download = `Shift_Happens_${exportFull ? 'Full_' : ''}${new Date().toISOString().slice(0, 10)}.html`;
+            a.download = `Shift_Happens_${exportFull ? 'Full_' : ''}${localDateStamp}.html`;
             a.click();
             URL.revokeObjectURL(url);
         }

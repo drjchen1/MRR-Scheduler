@@ -54,6 +54,20 @@ The scheduler supports three flexible entry options to fit your workflow:
 - **PapaParse** (Client-side CSV handling)
 - **Lucide Icons** (UI Iconography)
 
+## ✅ Testing
+This repo includes lightweight smoke tests for core scheduling behavior.
+
+Run:
+```bash
+npm test
+```
+
+Current smoke coverage:
+- Scheduler run integrity (no duplicate slot assignments per person, no blocked-slot assignments)
+- Custom day/slot config shape (`setScheduleConfig` + `getAllSlots`)
+- Move/swap consistency between instructor assignment lists and schedule grid state
+- Single-file CSV parsing for required fields, preference normalization, and constraints
+
 ## 📖 Help & Documentation
 Detailed operational guides and explanations of the internal algorithm are available in the included `Shift_Happens_Help.html` file. 
 
