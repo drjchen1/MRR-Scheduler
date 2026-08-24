@@ -281,3 +281,37 @@ test('exportSessionJSON and importSessionJSON serialize and restore schedule sta
   assert.deepEqual([...scheduler2.state.config.days], ['Mon', 'Tue']);
 });
 
+test('findBestMatch handles fuzzy last name spelling variations and prevents false middle-name matches', () => {
+  const scheduler = createScheduler();
+
+  const people = [
+    {
+      fullName: 'Ashamallah, Kyle',
+      lastName: 'ashamallah',
+      firstName: 'kyle',
+      parts: new Set(['ashamallah', 'kyle'])
+    },
+    {
+      fullName: 'Yandell, Evan',
+      lastName: 'yandell',
+      firstName: 'evan',
+      parts: new Set(['yandell', 'evan'])
+    },
+    {
+      fullName: 'Rehwinkel, Philip F',
+      lastName: 'rehwinkel',
+      firstName: 'philip',
+      parts: new Set(['rehwinkel', 'philip'])
+    }
+  ];
+
+  // 1. Ashmallah (with 'm') should fuzzy-match Ashamallah (with 'a'), NOT Rehwinkel (who has 'Philip')
+  const matchAshamallah = scheduler.findBestMatch('Ashmallah, Kyle Philip', people);
+  assert.equal(matchAshamallah ? matchAshamallah.fullName : null, 'Ashamallah, Kyle');
+
+  // 2. Corcoran, James Evan should NOT match Evan Yandell just because of the middle name 'Evan'
+  const matchCorcoran = scheduler.findBestMatch('Corcoran, James Evan', people);
+  assert.equal(matchCorcoran, null);
+});
+
+

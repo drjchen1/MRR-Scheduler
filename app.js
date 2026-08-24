@@ -496,26 +496,78 @@ class ShiftHappensScheduler {
         // this.runScheduler(); // Removed to allow preview first
     }
 
+    levenshtein(a, b) {
+        const tmp = [];
+        let i, j;
+        for (i = 0; i <= a.length; i++) tmp[i] = [i];
+        for (j = 0; j <= b.length; j++) tmp[0][j] = j;
+        for (i = 1; i <= a.length; i++) {
+            for (j = 1; j <= b.length; j++) {
+                tmp[i][j] = Math.min(
+                    tmp[i - 1][j] + 1,
+                    tmp[i][j - 1] + 1,
+                    tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+                );
+            }
+        }
+        return tmp[a.length][b.length];
+    }
+
     findBestMatch(name, people) {
-        if (!name) return null;
-        const parts = this.cleanNameParts(name);
-        let best = null;
-        let maxIntersect = 0;
+        if (!name || !Array.isArray(people) || people.length === 0) return null;
+
+        const targetParsed = this.parseName(name);
+        const targetLastClean = String(targetParsed.last || '').replace(/\(instr\)/gi, '').replace(/[^a-zA-Z]/g, '').toLowerCase();
+        const targetFirstClean = String(targetParsed.first || '').replace(/\(instr\)/gi, '').replace(/[^a-zA-Z]/g, '').toLowerCase();
+        const targetFirstTokens = this.cleanNameParts(targetParsed.first);
+        const targetTokens = this.cleanNameParts(name);
+
+        if (!targetLastClean && targetTokens.size === 0) return null;
+
+        let bestMatch = null;
+        let bestScore = -1;
 
         for (const p of people) {
-            const intersection = new Set([...parts].filter(x => p.parts.has(x)));
-            if (intersection.size > maxIntersect) {
-                maxIntersect = intersection.size;
-                best = p;
+            const candName = p.name || `${p.lastName || ''}, ${p.firstName || ''}`;
+            const candParsed = this.parseName(candName);
+            const candLastClean = String(candParsed.last || p.lastName || '').replace(/\(instr\)/gi, '').replace(/[^a-zA-Z]/g, '').toLowerCase();
+            const candFirstClean = String(candParsed.first || p.firstName || '').replace(/\(instr\)/gi, '').replace(/[^a-zA-Z]/g, '').toLowerCase();
+            const candFirstTokens = this.cleanNameParts(candParsed.first);
+            const candTokens = p.parts || this.cleanNameParts(candName);
+
+            // 1. Exact or normalized last name match (e.g., "de_alba" vs "dealba")
+            const lastExact = (targetLastClean && candLastClean && targetLastClean === candLastClean) ||
+                (targetLastClean.length >= 4 && candLastClean.length >= 4 && (targetLastClean.includes(candLastClean) || candLastClean.includes(targetLastClean)));
+
+            // 2. Fuzzy last name match (e.g. "ashmallah" vs "ashamallah" -> dist 1)
+            const lastDist = (targetLastClean && candLastClean) ? this.levenshtein(targetLastClean, candLastClean) : 99;
+            const lastFuzzy = lastDist <= 2 && (Math.min(targetLastClean.length, candLastClean.length) >= 4);
+
+            // Token overlap checks
+            const firstOverlap = [...targetFirstTokens].filter(t => candFirstTokens.has(t)).length;
+            const firstInitialMatch = targetFirstClean && candFirstClean && (targetFirstClean[0] === candFirstClean[0]);
+            const firstFuzzy = targetFirstClean && candFirstClean && (this.levenshtein(targetFirstClean, candFirstClean) <= 2);
+
+            const totalOverlap = [...targetTokens].filter(t => candTokens.has(t)).length;
+
+            let score = -1;
+
+            if (lastExact) {
+                score = 100 + totalOverlap * 10;
+            } else if (lastFuzzy && (firstOverlap > 0 || firstInitialMatch || firstFuzzy || !targetFirstClean || !candFirstClean)) {
+                score = 70 - lastDist * 10 + totalOverlap * 10;
+            } else if (targetTokens.size >= 2 && totalOverlap === targetTokens.size && targetTokens.size === candTokens.size) {
+                // Reversed first/last name exact token set match (e.g. "Idowu, Kabir" vs "Kabir, Idowu")
+                score = 90;
+            }
+
+            if (score > bestScore && score >= 50) {
+                bestScore = score;
+                bestMatch = p;
             }
         }
 
-        // Fallback to last name match
-        if (maxIntersect < 2) {
-            const lastName = name.split(',')[0].trim().toLowerCase();
-            best = people.find(p => p.lastName === lastName) || best;
-        }
-        return best;
+        return bestMatch;
     }
 
     calculateRequired(course, sections) {
