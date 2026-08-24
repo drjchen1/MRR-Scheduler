@@ -1150,6 +1150,7 @@
 
                             return `
                                 <div class="staff-card ${isActive ? 'active-placement' : ''}" draggable="true" ondragstart="handleDragStart(event)"
+                                     onclick="scrollToRosterStaff(this.dataset.name)"
                                      onmouseenter="highlightStaff('${s.name}')" onmouseleave="clearHighlights()"
                                      data-name="${s.name}" data-course="${s.course}" data-mrr="${s.isMRR}">
                                     <div class="staff-card-header">
@@ -1410,6 +1411,23 @@
                 const cell = document.getElementById(id);
                 if (cell) cell.classList.add('unavail-highlight');
             });
+        }
+
+        function scrollToRosterStaff(name) {
+            if (!name) return;
+            if (document.body.classList.contains('sidebar-hidden')) {
+                document.body.classList.remove('sidebar-hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+            const roster = document.getElementById('sidebar-roster');
+            if (!roster) return;
+
+            const cards = Array.from(roster.querySelectorAll('.staff-card'));
+            const targetCard = cards.find(card => card.dataset.name === name);
+            if (targetCard) {
+                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                highlightStaff(name);
+            }
         }
 
         function normalizeCourse(c) {
