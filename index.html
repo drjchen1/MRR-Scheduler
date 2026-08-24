@@ -66,6 +66,10 @@
                             <i data-lucide="rotate-ccw"></i>
                             <span>Reset</span>
                         </button>
+                        <button class="btn btn-ghost" onclick="saveSession()" title="Save Session Progress (JSON)">
+                            <i data-lucide="save"></i>
+                            <span>Save Session</span>
+                        </button>
                         <button class="btn btn-primary" onclick="exportHTML()">
                             <i data-lucide="download"></i>
                             <span>Export Schedule</span>
@@ -108,16 +112,15 @@
                                 and enter staff details manually.</p>
                         </div>
 
-                        <!-- Option 3: Single File -->
+                        <!-- Option 3: Single File / Load Session -->
                         <div class="glass-card option-card" onclick="showSingleUpload()"
                             style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px;">
                             <div
                                 style="width: 64px; height: 64px; background: var(--success)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
                                 <i data-lucide="file-up" style="width: 32px; height: 32px; color: var(--success);"></i>
                             </div>
-                            <h3 style="margin-bottom: 12px;">Single File Upload</h3>
-                            <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Upload a previously saved
-                                or sample-formatted input file.</p>
+                            <h3 style="margin-bottom: 12px;">Load Saved Session</h3>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Load a saved schedule session JSON or single CSV file.</p>
                         </div>
                     
                     </div>
@@ -178,17 +181,17 @@
                             <button class="btn btn-ghost" onclick="backToLanding()">
                                 <i data-lucide="arrow-left"></i>
                             </button>
-                            <h2>Upload Single Input File</h2>
+                            <h2>Upload Saved Session or Input File</h2>
                         </div>
                         <div class="upload-zone" id="single-dropzone"
                             onclick="document.getElementById('single-file-input').click()">
                             <i data-lucide="file-text"
                                 style="width: 48px; height: 48px; color: var(--success); margin-bottom: 16px;"></i>
-                            <p style="font-weight: 600;">Click or drag to upload input.csv</p>
+                            <p style="font-weight: 600;">Click or drag to upload session (.json) or input (.csv)</p>
                             <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 8px;">
-                                Previously downloaded sample or saved schedule data
+                                Previously saved schedule session JSON or sample CSV data
                             </p>
-                            <input type="file" id="single-file-input" accept=".csv" style="display: none;">
+                            <input type="file" id="single-file-input" accept=".json,.csv" style="display: none;">
                         </div>
                     </div>
                 </div>
@@ -694,12 +697,23 @@
             };
         }
 
-        // Single file upload logic
-        const singleFileInput = document.getElementById('single-file-input');
-        if (singleFileInput) {
-            singleFileInput.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
+        // Single file upload logic (Supports .json session state or .csv input data)
+        function handleSingleFileInput(file) {
+            if (!file) return;
+            const name = (file.name || "").toLowerCase();
+            if (name.endsWith('.json')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    window.scheduler.importSessionJSON(e.target.result);
+                };
+                reader.readAsText(file);
+            } else {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const text = (e.target.result || "").trim();
+                    if (text.startsWith('{')) {
+                        if (window.scheduler.importSessionJSON(text)) return;
+                    }
                     Papa.parse(file, {
                         header: true,
                         skipEmptyLines: true,
@@ -707,7 +721,15 @@
                             window.scheduler.processSingleFile(results.data);
                         }
                     });
-                }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        const singleFileInput = document.getElementById('single-file-input');
+        if (singleFileInput) {
+            singleFileInput.onchange = (e) => {
+                handleSingleFileInput(e.target.files[0]);
             };
         }
 
@@ -719,16 +741,7 @@
             singleDropzone.ondrop = (e) => {
                 e.preventDefault();
                 singleDropzone.classList.remove('dragover');
-                const file = e.dataTransfer.files[0];
-                if (file) {
-                    Papa.parse(file, {
-                        header: true,
-                        skipEmptyLines: true,
-                        complete: (results) => {
-                            window.scheduler.processSingleFile(results.data);
-                        }
-                    });
-                }
+                handleSingleFileInput(e.dataTransfer.files[0]);
             };
         }
 
@@ -829,6 +842,34 @@
             link.click();
             document.body.removeChild(link);
         }
+
+        function saveSession() {
+            const content = window.scheduler.exportSessionJSON();
+            const blob = new Blob([content], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            const now = new Date();
+            const localDateStamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            link.setAttribute("href", url);
+            link.setAttribute("download", `shift_happens_session_${localDateStamp}.json`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        window.scheduler.onImportSession = (state) => {
+            document.getElementById('landing-stage').style.display = 'none';
+            document.getElementById('upload-stage').style.display = 'none';
+            document.getElementById('single-upload-stage').style.display = 'none';
+            document.getElementById('preview-stage').style.display = 'none';
+            document.getElementById('schedule-stage').style.display = 'block';
+
+            if (typeof loadConfigToUI === 'function') {
+                loadConfigToUI();
+            }
+        };
 
         // --- Preview Logic ---
         window.scheduler.onPreview = (state) => {

@@ -224,3 +224,60 @@ test('processSingleFile parses required fields and normalizes preferences', asyn
   assert.equal(scheduler.state.instructors[1].required, 2);
   assert.equal(scheduler.state.instructors[1].pref, 'No preference');
 });
+
+test('exportSessionJSON and importSessionJSON serialize and restore schedule state correctly', () => {
+  const scheduler = createScheduler();
+
+  scheduler.setScheduleConfig(
+    ['Mon', 'Tue'],
+    [],
+    {
+      Mon: ['09:30', '10:30'],
+      Tue: ['09:30', '10:30']
+    }
+  );
+
+  scheduler.state.instructors = [
+    {
+      name: 'Epsilon, Evan',
+      course: 'MA 16100',
+      sections: 1,
+      unavail: ['Mon 09:30'],
+      isMRR: false,
+      required: 1,
+      pref: 'Yes',
+      assignments: ['Mon 10:30']
+    }
+  ];
+
+  scheduler.state.schedule = {
+    Mon: {
+      '09:30': [],
+      '10:30': [{ name: 'Epsilon, Evan', course: 'MA 16100', isMRR: false }]
+    },
+    Tue: {
+      '09:30': [],
+      '10:30': []
+    }
+  };
+
+  const jsonString = scheduler.exportSessionJSON();
+  const parsed = JSON.parse(jsonString);
+
+  assert.equal(parsed.version, '1.0');
+  assert.equal(parsed.instructors.length, 1);
+  assert.equal(parsed.instructors[0].name, 'Epsilon, Evan');
+  assert.equal(parsed.schedule.Mon['10:30'][0].name, 'Epsilon, Evan');
+
+  // Clear state and import
+  const scheduler2 = createScheduler();
+  const success = scheduler2.importSessionJSON(jsonString);
+
+  assert.equal(success, true);
+  assert.equal(scheduler2.state.instructors.length, 1);
+  assert.equal(scheduler2.state.instructors[0].name, 'Epsilon, Evan');
+  assert.deepEqual([...scheduler2.state.instructors[0].assignments], ['Mon 10:30']);
+  assert.equal(scheduler2.state.schedule.Mon['10:30'][0].name, 'Epsilon, Evan');
+  assert.deepEqual([...scheduler2.state.config.days], ['Mon', 'Tue']);
+});
+

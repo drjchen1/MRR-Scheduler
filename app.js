@@ -867,6 +867,66 @@ class ShiftHappensScheduler {
         return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
     }
 
+    exportSessionJSON() {
+        const payload = {
+            version: "1.0",
+            timestamp: new Date().toISOString(),
+            config: JSON.parse(JSON.stringify(this.state.config)),
+            instructors: JSON.parse(JSON.stringify(this.state.instructors)),
+            schedule: JSON.parse(JSON.stringify(this.state.schedule))
+        };
+        return JSON.stringify(payload, null, 2);
+    }
+
+    importSessionJSON(jsonData) {
+        let data = jsonData;
+        if (typeof jsonData === 'string') {
+            try {
+                data = JSON.parse(jsonData);
+            } catch (err) {
+                console.error("Invalid JSON session data", err);
+                alert("Failed to parse session JSON file.");
+                return false;
+            }
+        }
+        if (!data || typeof data !== 'object') {
+            alert("Invalid session data format.");
+            return false;
+        }
+
+        if (data.config) {
+            this.state.config = {
+                ...this.state.config,
+                ...JSON.parse(JSON.stringify(data.config))
+            };
+        }
+
+        if (Array.isArray(data.instructors)) {
+            this.state.instructors = JSON.parse(JSON.stringify(data.instructors));
+        } else {
+            this.state.instructors = [];
+        }
+
+        if (data.schedule && typeof data.schedule === 'object') {
+            this.state.schedule = JSON.parse(JSON.stringify(data.schedule));
+        } else {
+            this.state.schedule = {};
+        }
+
+        this.state.history = [];
+        this.computeCoreCourses();
+        this.saveHistory();
+
+        if (this.onImportSession) {
+            this.onImportSession(this.state);
+        }
+
+        if (this.onRender) {
+            this.onRender(this.state);
+        }
+        return true;
+    }
+
     // --- UI Rendering ---
     async optimizeSchedule() {
         const { slots } = this.state.config;
