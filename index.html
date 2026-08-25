@@ -36,49 +36,89 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="top-nav">
-                <div style="display: flex; gap: 16px;">
-                    <div style="display: flex; gap: 12px; align-items: center;">
-                        <button class="btn btn-ghost" onclick="toggleSidebar()" title="Toggle Roster">
+                <!-- 1. Landing / Setup Navigation -->
+                <div id="nav-landing-actions" class="nav-container">
+                    <div class="nav-brand">
+                        <div class="brand-icon">
+                            <i data-lucide="calendar" style="color: var(--primary); width: 22px; height: 22px;"></i>
+                        </div>
+                        <div>
+                            <span class="brand-title">Shift Happens</span>
+                            <span class="brand-subtitle">Dynamic Staffing Dashboard</span>
+                        </div>
+                    </div>
+                    <div class="nav-actions">
+                        <button class="btn btn-ghost" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
+                            <i data-lucide="sun" id="theme-icon-landing"></i>
+                            <span class="btn-text">Theme</span>
+                        </button>
+                        <a href="Shift_Happens_Help.html" target="_blank" class="btn btn-ghost" title="Open User Guide & Handbook">
+                            <i data-lucide="help-circle"></i>
+                            <span class="btn-text">User Guide</span>
+                        </a>
+                        <button class="btn btn-ghost" onclick="downloadSample()" title="Download Sample Input CSV Template">
+                            <i data-lucide="download-cloud"></i>
+                            <span class="btn-text">Sample CSV</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Active Schedule Navigation (Grouped, Responsive, Zero-Overflow) -->
+                <div id="nav-schedule-actions" class="nav-container" style="display: none;">
+                    <!-- Left: Navigation & History -->
+                    <div class="nav-group nav-left">
+                        <button class="btn btn-ghost" onclick="toggleSidebar()" title="Toggle Roster Sidebar">
                             <i data-lucide="menu"></i>
                         </button>
                         <button class="btn btn-ghost" onclick="toggleTheme()" title="Toggle Theme">
                             <i data-lucide="sun" id="theme-icon"></i>
                         </button>
-                        <button class="btn btn-ghost" onclick="undo()" title="Undo action">
+                        <div class="nav-divider"></div>
+                        <button class="btn btn-ghost" onclick="undo()" title="Undo Last Action">
                             <i data-lucide="undo-2"></i>
-                            <span>Undo</span>
+                            <span class="btn-text">Undo</span>
                         </button>
-                    </div>
-                    <div style="display: flex; gap: 12px;">
-                        <button class="btn btn-ghost" onclick="openSwapModal()">
-                            <i data-lucide="arrow-left-right"></i>
-                            <span>Swap Staff</span>
-                        </button>
-                        <button class="btn btn-ghost" onclick="toggleHeatmap()">
-                            <i data-lucide="flame"></i>
-                            <span>Heatmap</span>
-                        </button>
-                        <button class="btn btn-ghost" onclick="toggleFullView()" title="Toggle Full View">
-                            <i data-lucide="maximize" id="fullview-icon"></i>
-                            <span>Full View</span>
-                        </button>
-                        <button class="btn btn-ghost" onclick="resetToLanding()" title="Reset">
+                        <button class="btn btn-ghost" onclick="resetToLanding()" title="Start New / Reset Schedule">
                             <i data-lucide="rotate-ccw"></i>
-                            <span>Reset</span>
-                        </button>
-                        <button class="btn btn-ghost" onclick="saveSession()" title="Save Session Progress (JSON)">
-                            <i data-lucide="save"></i>
-                            <span>Save Session</span>
-                        </button>
-                        <button class="btn btn-ghost" onclick="printSchedule()" title="Print Schedule (Letter Paper)">
-                            <i data-lucide="printer"></i>
-                            <span>Print Schedule</span>
-                        </button>
-                        <button class="btn btn-primary" onclick="exportHTML()">
-                            <i data-lucide="download"></i>
-                            <span>Export Schedule</span>
+                            <span class="btn-text">New</span>
                         </button>
                     </div>
+
+                    <!-- Center: View Modes Segmented Control -->
+                    <div class="nav-group nav-center">
+                        <div class="segmented-control">
+                            <button class="seg-btn" id="btn-heatmap" onclick="toggleHeatmap()" title="Toggle Availability Heatmap">
+                                <i data-lucide="flame"></i>
+                                <span class="btn-text">Heatmap</span>
+                            </button>
+                            <button class="seg-btn" id="btn-fullview" onclick="toggleFullView()" title="Toggle High-Density Fullscreen View">
+                                <i data-lucide="maximize" id="fullview-icon"></i>
+                                <span class="btn-text">Full View</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Actions & Exports -->
+                    <div class="nav-group nav-right">
+                        <button class="btn btn-ghost" onclick="openSwapModal()" title="Swap Two Staff Assignments">
+                            <i data-lucide="arrow-left-right"></i>
+                            <span class="btn-text">Swap</span>
+                        </button>
+                        <div class="nav-divider"></div>
+                        <button class="btn btn-ghost" onclick="saveSession()" title="Save Schedule Session (.json)">
+                            <i data-lucide="save"></i>
+                            <span class="btn-text">Save</span>
+                        </button>
+                        <button class="btn btn-ghost" onclick="printSchedule()" title="Print Letter-Sized Calendar Schedule">
+                            <i data-lucide="printer"></i>
+                            <span class="btn-text">Print</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="exportHTML()" title="Export Standalone HTML">
+                            <i data-lucide="download"></i>
+                            <span class="btn-text">Export</span>
+                        </button>
+                    </div>
+                </div>
             </header>
 
             <div class="content-body" id="app-body">
@@ -128,13 +168,28 @@
                     </div>
 
                     <div class="glass-card" id="schedule-config" style="margin-top: 24px; padding: 20px;">
-                        <h2 style="margin-bottom: 8px; font-size: 1.25rem;">Schedule Time Slots</h2>
-                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 14px;">Toggle the slots you want per day. Click Add to insert a custom time (HH:MM).</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <h2 style="margin-bottom: 4px; font-size: 1.2rem;">Operating Hours & Time Slots</h2>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">Select an operating schedule preset or customize individual day slots below.</p>
+                            </div>
+                            <div class="preset-group" style="margin-bottom: 0;">
+                                <button class="preset-btn active" id="preset-standard" onclick="applyPreset('standard')">
+                                    <i data-lucide="zap" style="width: 14px; height: 14px;"></i> Standard Weekdays
+                                </button>
+                                <button class="preset-btn" id="preset-full_weekdays" onclick="applyPreset('full_weekdays')">
+                                    <i data-lucide="briefcase" style="width: 14px; height: 14px;"></i> Full Weekdays
+                                </button>
+                                <button class="preset-btn" id="preset-full_week" onclick="applyPreset('full_week')">
+                                    <i data-lucide="globe" style="width: 14px; height: 14px;"></i> Full 7 Days
+                                </button>
+                            </div>
+                        </div>
 
-                        <div id="schedule-days" style="display: grid; grid-template-columns: 1fr; gap: 12px;"></div>
+                        <div id="schedule-days" style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px;"></div>
 
                         <div style="display: flex; gap: 12px; margin-top: 16px;">
-                            <button class="btn btn-primary" onclick="applySlotConfig()">Apply</button>
+                            <button class="btn btn-primary" onclick="applySlotConfig()">Apply Custom Slots</button>
                             <button class="btn btn-ghost" onclick="resetSlotConfig()">Reset Default</button>
                         </div>
                     </div>
@@ -656,6 +711,50 @@
             }
         }
 
+        function applyPreset(presetType) {
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            const clickedBtn = document.getElementById(`preset-${presetType}`);
+            if (clickedBtn) clickedBtn.classList.add('active');
+
+            const allStandardSlots = ['09:30', '10:30', '11:30', '12:30', '13:30', '14:30', '15:30', '16:30'];
+            const fridaySlots = ['09:30', '10:30', '11:30', '12:30'];
+
+            if (presetType === 'standard') {
+                activeSlotsByDay.Mon = [...allStandardSlots];
+                activeSlotsByDay.Tue = [...allStandardSlots];
+                activeSlotsByDay.Wed = [...allStandardSlots];
+                activeSlotsByDay.Thu = [...allStandardSlots];
+                activeSlotsByDay.Fri = [...fridaySlots];
+                activeSlotsByDay.Sat = [];
+                activeSlotsByDay.Sun = [];
+                loadConfigToUI({
+                    enabledDays: new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+                    selectedByDay: activeSlotsByDay
+                });
+            } else if (presetType === 'full_weekdays') {
+                activeSlotsByDay.Mon = [...allStandardSlots];
+                activeSlotsByDay.Tue = [...allStandardSlots];
+                activeSlotsByDay.Wed = [...allStandardSlots];
+                activeSlotsByDay.Thu = [...allStandardSlots];
+                activeSlotsByDay.Fri = [...allStandardSlots];
+                activeSlotsByDay.Sat = [];
+                activeSlotsByDay.Sun = [];
+                loadConfigToUI({
+                    enabledDays: new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+                    selectedByDay: activeSlotsByDay
+                });
+            } else if (presetType === 'full_week') {
+                DAY_ORDER.forEach(d => {
+                    activeSlotsByDay[d] = [...allStandardSlots];
+                });
+                loadConfigToUI({
+                    enabledDays: new Set([...DAY_ORDER]),
+                    selectedByDay: activeSlotsByDay
+                });
+            }
+            applySlotConfig();
+        }
+
         function resetSlotConfig() {
             const enabledDays = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
             const selectedByDay = JSON.parse(JSON.stringify(DEFAULT_SLOTS_BY_DAY));
@@ -667,19 +766,54 @@
             Object.keys(customSlotsByDay).forEach(k => delete customSlotsByDay[k]);
             loadConfigToUI({ enabledDays, selectedByDay });
             applySlotConfig();
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            const stdBtn = document.getElementById('preset-standard');
+            if (stdBtn) stdBtn.classList.add('active');
         }
 
         loadConfigToUI();
 
-        
+        function setAppStage(stage) {
+            const landing = document.getElementById('landing-stage');
+            const upload = document.getElementById('upload-stage');
+            const single = document.getElementById('single-upload-stage');
+            const preview = document.getElementById('preview-stage');
+            const schedule = document.getElementById('schedule-stage');
+
+            const landingNav = document.getElementById('nav-landing-actions');
+            const scheduleNav = document.getElementById('nav-schedule-actions');
+
+            if (landing) landing.style.display = 'none';
+            if (upload) upload.style.display = 'none';
+            if (single) single.style.display = 'none';
+            if (preview) preview.style.display = 'none';
+            if (schedule) schedule.style.display = 'none';
+
+            if (stage === 'schedule') {
+                if (schedule) schedule.style.display = 'block';
+                if (landingNav) landingNav.style.display = 'none';
+                if (scheduleNav) scheduleNav.style.display = 'flex';
+                document.body.classList.remove('sidebar-hidden');
+            } else {
+                if (stage === 'landing' && landing) landing.style.display = 'block';
+                if (stage === 'upload' && upload) upload.style.display = 'block';
+                if (stage === 'single-upload' && single) single.style.display = 'block';
+                if (stage === 'preview' && preview) preview.style.display = 'block';
+
+                if (landingNav) landingNav.style.display = 'flex';
+                if (scheduleNav) scheduleNav.style.display = 'none';
+                document.body.classList.add('sidebar-hidden');
+            }
+            lucide.createIcons();
+        }
+
         function resetToLanding() {
             if (!confirm("Return to the start screen? This will clear the current schedule and uploaded data.")) return;
             files.people = null;
             files.mrr = null;
             files.teaching = null;
             updateFileList();
-            backToLanding();
-            document.getElementById('schedule-stage').style.display = 'none';
+            setAppStage('landing');
             const alertArea = document.getElementById('schedule-alerts');
             if (alertArea) alertArea.innerHTML = '';
             if (window.scheduler) {
@@ -694,22 +828,17 @@
             }
         }
 
-// --- Navigation ---
+        // --- Navigation ---
         function showTripleUpload() {
-            document.getElementById('landing-stage').style.display = 'none';
-            document.getElementById('upload-stage').style.display = 'block';
+            setAppStage('upload');
         }
 
         function showSingleUpload() {
-            document.getElementById('landing-stage').style.display = 'none';
-            document.getElementById('single-upload-stage').style.display = 'block';
+            setAppStage('single-upload');
         }
 
         function backToLanding() {
-            document.getElementById('landing-stage').style.display = 'block';
-            document.getElementById('upload-stage').style.display = 'none';
-            document.getElementById('single-upload-stage').style.display = 'none';
-            document.getElementById('preview-stage').style.display = 'none';
+            setAppStage('landing');
         }
 
         function startManual() {
@@ -847,11 +976,7 @@
 
         if (makeScheduleBtn) {
             makeScheduleBtn.onclick = async () => {
-                document.getElementById('landing-stage').style.display = 'none';
-                document.getElementById('upload-stage').style.display = 'none';
-                document.getElementById('single-upload-stage').style.display = 'none';
-                document.getElementById('preview-stage').style.display = 'none';
-                document.getElementById('schedule-stage').style.display = 'block';
+                setAppStage('schedule');
                 makeScheduleBtn.disabled = true;
                 makeScheduleBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i><span>Generating...</span>';
                 lucide.createIcons();
@@ -896,11 +1021,7 @@
         }
 
         window.scheduler.onImportSession = (state) => {
-            document.getElementById('landing-stage').style.display = 'none';
-            document.getElementById('upload-stage').style.display = 'none';
-            document.getElementById('single-upload-stage').style.display = 'none';
-            document.getElementById('preview-stage').style.display = 'none';
-            document.getElementById('schedule-stage').style.display = 'block';
+            setAppStage('schedule');
 
             if (typeof loadConfigToUI === 'function') {
                 loadConfigToUI();
@@ -909,10 +1030,7 @@
 
         // --- Preview Logic ---
         window.scheduler.onPreview = (state) => {
-            document.getElementById('upload-stage').style.display = 'none';
-            document.getElementById('landing-stage').style.display = 'none';
-            document.getElementById('single-upload-stage').style.display = 'none';
-            document.getElementById('preview-stage').style.display = 'block';
+            setAppStage('preview');
 
             const list = document.getElementById('preview-list');
             list.innerHTML = state.instructors.map((inst, idx) => `
@@ -1106,7 +1224,9 @@
             const body = document.body;
             const isFull = body.classList.toggle('full-view-mode');
             const icon = document.getElementById('fullview-icon');
-            icon.setAttribute('data-lucide', isFull ? 'minimize' : 'maximize');
+            if (icon) icon.setAttribute('data-lucide', isFull ? 'minimize' : 'maximize');
+            const btn = document.getElementById('btn-fullview');
+            if (btn) btn.classList.toggle('active', isFull);
             lucide.createIcons();
 
             // Re-render to adjust grid layout if needed
@@ -1123,10 +1243,14 @@
         // --- Theme Logic ---
         function toggleTheme() {
             const body = document.body;
-            const current = body.getAttribute('data-theme');
+            const current = body.getAttribute('data-theme') || 'light';
             const next = current === 'dark' ? 'light' : 'dark';
             body.setAttribute('data-theme', next);
-            document.getElementById('theme-icon').setAttribute('data-lucide', next === 'dark' ? 'moon' : 'sun');
+            const iconName = next === 'dark' ? 'moon' : 'sun';
+            const iconSchedule = document.getElementById('theme-icon');
+            const iconLanding = document.getElementById('theme-icon-landing');
+            if (iconSchedule) iconSchedule.setAttribute('data-lucide', iconName);
+            if (iconLanding) iconLanding.setAttribute('data-lucide', iconName);
             lucide.createIcons();
         }
 
@@ -1135,16 +1259,7 @@
             const grid = document.getElementById('main-grid');
             const hasSchedule = state.schedule && Object.keys(state.schedule).length > 0;
             if (hasSchedule) {
-                const landing = document.getElementById('landing-stage');
-                const upload = document.getElementById('upload-stage');
-                const single = document.getElementById('single-upload-stage');
-                const preview = document.getElementById('preview-stage');
-                const schedule = document.getElementById('schedule-stage');
-                if (landing) landing.style.display = 'none';
-                if (upload) upload.style.display = 'none';
-                if (single) single.style.display = 'none';
-                if (preview) preview.style.display = 'none';
-                if (schedule) schedule.style.display = 'block';
+                setAppStage('schedule');
             }
             const roster = document.getElementById('sidebar-roster');
             const { days, slots, coreCourses, slotsByDay } = state.config;
@@ -1681,18 +1796,37 @@
             if (!summary) {
                 summary = document.createElement('div');
                 summary.id = 'schedule-summary';
-                summary.className = 'glass-card';
-                summary.style.cssText = 'padding: 12px 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap;';
+                summary.className = 'glass-card score-ribbon';
                 alertArea.prepend(summary);
             }
 
+            const scoreClass = overall >= 90 ? 'score-high' : (overall >= 75 ? 'score-mid' : 'score-low');
             summary.innerHTML = `
-                <div style="font-weight: 800; font-size: 1rem;">Schedule Score: ${overall}</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">Coverage: ${coverageScore}% (gaps: ${gaps})</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">Assignments: ${assignmentScore}%</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">B2B satisfied: ${b2bScore}%</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">Balance: ${balanceScore}%</div>
+                <div class="score-main">
+                    <span class="score-label">Schedule Score</span>
+                    <span class="score-value ${scoreClass}">${overall}<span class="score-max">/100</span></span>
+                </div>
+                <div class="score-divider"></div>
+                <div class="score-metrics">
+                    <div class="metric-pill ${gaps === 0 ? 'metric-good' : 'metric-warn'}" title="Required course coverage across all active slots">
+                        <i data-lucide="${gaps === 0 ? 'shield-check' : 'alert-triangle'}"></i>
+                        <span><strong>${coverageScore}%</strong> Coverage ${gaps > 0 ? `(${gaps} gaps)` : ''}</span>
+                    </div>
+                    <div class="metric-pill ${assignmentScore === 100 ? 'metric-good' : 'metric-warn'}" title="Staff with 100% required hours met">
+                        <i data-lucide="users"></i>
+                        <span><strong>${assignmentScore}%</strong> Assigned</span>
+                    </div>
+                    <div class="metric-pill ${b2bScore >= 80 ? 'metric-good' : 'metric-neutral'}" title="Back-to-Back teaching preferences fulfilled">
+                        <i data-lucide="repeat-2"></i>
+                        <span><strong>${b2bScore}%</strong> B2B</span>
+                    </div>
+                    <div class="metric-pill ${balanceScore >= 80 ? 'metric-good' : 'metric-neutral'}" title="Even distribution of staff load across the week">
+                        <i data-lucide="scale"></i>
+                        <span><strong>${balanceScore}%</strong> Balance</span>
+                    </div>
+                </div>
             `;
+            lucide.createIcons();
         }
 
         function refreshGaps(state) {
@@ -2189,6 +2323,8 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
         let heatmapActive = false;
         function toggleHeatmap() {
             heatmapActive = !heatmapActive;
+            const btn = document.getElementById('btn-heatmap');
+            if (btn) btn.classList.toggle('active', heatmapActive);
             const state = window.scheduler.state;
             const totalStaff = state.instructors.length;
 
@@ -2204,6 +2340,9 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
                 cell.classList.add(`heatmap-${score}`);
             });
         }
+
+        // Initialize application in landing stage with sidebar hidden
+        setAppStage('landing');
     </script>
 </body>
 

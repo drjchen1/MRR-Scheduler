@@ -93,8 +93,115 @@ body {
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
+    padding: 0 20px;
+    position: relative;
+    z-index: 20;
+}
+
+.nav-container {
+    display: flex;
+    width: 100%;
     justify-content: space-between;
-    padding: 0 24px;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+}
+
+.brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(99, 102, 241, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-title {
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--primary);
+    line-height: 1.2;
+    display: block;
+}
+
+.brand-subtitle {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: block;
+}
+
+.nav-group, .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-divider {
+    width: 1px;
+    height: 22px;
+    background: var(--border);
+    margin: 0 2px;
+}
+
+/* Segmented Control for View Toggles */
+.segmented-control {
+    display: inline-flex;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.seg-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.seg-btn:hover {
+    background: rgba(99, 102, 241, 0.08);
+}
+
+.seg-btn.active {
+    background: var(--primary);
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+}
+
+.seg-btn i {
+    width: 15px;
+    height: 15px;
+}
+
+/* Responsive Nav: Collapse button text on laptops / smaller screens */
+@media (max-width: 1240px) {
+    .nav-group .btn .btn-text,
+    .segmented-control .seg-btn .btn-text,
+    .nav-actions .btn .btn-text {
+        display: none;
+    }
+    .nav-group .btn,
+    .nav-actions .btn {
+        padding: 8px 10px;
+    }
 }
 
 .content-body {
@@ -111,6 +218,115 @@ body {
     border-radius: var(--radius);
     padding: 24px;
     box-shadow: var(--shadow);
+}
+
+/* Time Slot Presets */
+.preset-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.preset-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.preset-btn:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.preset-btn.active {
+    background: var(--primary);
+    color: white !important;
+    border-color: var(--primary);
+}
+
+/* Score Ribbon */
+.score-ribbon {
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.score-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.score-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.score-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.score-high { color: var(--success); }
+.score-mid { color: var(--warning); }
+.score-low { color: var(--danger); }
+.score-max { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+
+.score-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+}
+
+.score-metrics {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.metric-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.metric-pill i { width: 14px; height: 14px; }
+.metric-good i { color: var(--success); }
+.metric-neutral i { color: var(--primary); }
+.metric-warn {
+    background: #fffbeb;
+    border-color: #fbbf24;
+    color: #b45309;
+}
+.metric-warn i { color: #b45309; }
+[data-theme="dark"] .metric-warn {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
 }
 
 /* Landing Stage & Option Cards */
@@ -211,6 +427,8 @@ body {
     transition: all 0.2s;
     border: 1px solid transparent;
     font-size: 14px;
+    text-decoration: none;
+    color: inherit;
 }
 
 .btn-primary {
