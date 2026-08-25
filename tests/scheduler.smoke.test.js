@@ -314,4 +314,139 @@ test('findBestMatch handles fuzzy last name spelling variations and prevents fal
   assert.equal(matchCorcoran, null);
 });
 
+test('MA 15300 is included in potentialCore and assigns 1 hour per section', () => {
+  const scheduler = createScheduler();
+
+  assert(scheduler.state.config.potentialCore.includes('MA 15300'));
+  assert.equal(scheduler.calculateRequired('MA 15300', 1), 1);
+  assert.equal(scheduler.state.config.halfHourCourses.includes('MA 15300'), false);
+});
+
+test('MRR coverage algorithm covers slots missing MA 15300 with MRR staff', async () => {
+  const scheduler = createScheduler();
+
+  scheduler.setScheduleConfig(
+    ['Mon'],
+    [],
+    { Mon: ['09:30', '10:30'] }
+  );
+
+  scheduler.state.instructors = [
+    {
+      name: 'Alpha, Alice',
+      course: 'MA 15300',
+      sections: 1,
+      unavail: [slotId('Mon', '10:30')], // Blocked from 10:30, so must be at 09:30
+      isMRR: false,
+      required: 1,
+      pref: 'No preference',
+      assignments: []
+    },
+    {
+      name: 'Beta, Bob',
+      course: 'MRR',
+      sections: 1,
+      unavail: [slotId('Mon', '09:30')], // Available at 10:30
+      isMRR: true,
+      required: 1,
+      pref: 'No preference',
+      assignments: []
+    }
+  ];
+
+  await scheduler.runScheduler();
+
+  // Core courses should have detected MA 15300
+  assert(scheduler.state.config.coreCourses.includes('MA 15300'));
+
+  // Alice covers 09:30
+  const alice = scheduler.state.instructors.find(i => i.name === 'Alpha, Alice');
+  assert.deepEqual([...alice.assignments], [slotId('Mon', '09:30')]);
+
+  // Bob (MRR) covers 10:30 (where MA 15300 is missing)
+  const bob = scheduler.state.instructors.find(i => i.name === 'Beta, Bob');
+  assert.deepEqual([...bob.assignments], [slotId('Mon', '10:30')]);
+
+  // Check that slot 10:30 has Bob as MRR covering MA 15300
+  const slot1030 = scheduler.state.schedule.Mon['10:30'];
+  assert.equal(slot1030.some(s => s.isMRR), true);
+});
+
+test('User can select and add custom required courses to enforce MRR coverage even without primary instructors', async () => {
+  const scheduler = createScheduler();
+
+  scheduler.setScheduleConfig(
+    ['Mon'],
+    [],
+    { Mon: ['09:30', '10:30'] }
+  );
+
+  // Instructors only teach MA 16100 and MRR (no MA 15300 or STAT 30100 primary instructor)
+  scheduler.state.instructors = [
+    {
+      name: 'Teacher One',
+      course: 'MA 16100',
+      sections: 2,
+      unavail: [],
+      isMRR: false,
+      required: 2,
+      pref: 'No preference',
+      assignments: []
+    },
+    {
+      name: 'MRR Staff',
+      course: 'MRR',
+      sections: 2,
+      unavail: [],
+      isMRR: true,
+      required: 2,
+      pref: 'No preference',
+      assignments: []
+    }
+  ];
+
+  // Verify detected courses
+  assert.deepEqual([...scheduler.getDetectedCourses()], ['MA 16100']);
+
+  // User adds custom course and selects MA 15300
+  scheduler.addRequiredCourse('STAT 30100');
+  scheduler.toggleRequiredCourse('MA 15300', true);
+
+  assert(scheduler.state.config.coreCourses.includes('STAT 30100'));
+  assert(scheduler.state.config.coreCourses.includes('MA 15300'));
+
+  await scheduler.runScheduler();
+
+  // Primary instructor is in both slots for MA 16100
+  // But slots are missing MA 15300 and STAT 30100
+  // Scheduler must ensure MRR staff covers them
+  const mrr = scheduler.state.instructors.find(i => i.name === 'MRR Staff');
+  assert.equal(mrr.assigned, 2);
+
+  // Check that missing core courses in Mon 09:30 includes MA 15300 and STAT 30100
+  const entries0930 = scheduler.state.schedule.Mon['09:30'];
+  const missing0930 = scheduler.getMissingCoreForEntries(entries0930);
+  assert(missing0930.includes('MA 15300'));
+  assert(missing0930.includes('STAT 30100'));
+
+  // Test session export/import preserves custom and selected courses
+  const sessionJson = scheduler.exportSessionJSON();
+  const scheduler2 = createScheduler();
+  scheduler2.importSessionJSON(sessionJson);
+
+  assert(scheduler2.state.config.coreCourses.includes('MA 15300'));
+  assert(scheduler2.state.config.coreCourses.includes('STAT 30100'));
+  assert(scheduler2.state.config.customCoreCourses.includes('STAT 30100'));
+});
+
+test('Missing core courses and MRR coverage lists are sorted in natural numerical order', () => {
+  const scheduler = createScheduler();
+  scheduler.state.config.coreCourses = ['MA 26100', 'MA 15300', 'MA 16010', 'MA 15800', 'MA 16200'];
+
+  const missing = scheduler.getMissingCoreForEntries([]);
+  assert.deepEqual([...missing], ['MA 15300', 'MA 15800', 'MA 16010', 'MA 16200', 'MA 26100']);
+});
+
+
+
 

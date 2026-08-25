@@ -87,40 +87,53 @@
                             scheduling session</p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                         <!-- Option 1: 3 CSVs -->
                         <div class="glass-card option-card" onclick="showTripleUpload()"
-                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px;">
+                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 20px;">
                             <div
-                                style="width: 64px; height: 64px; background: var(--primary)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
-                                <i data-lucide="files" style="width: 32px; height: 32px; color: var(--primary);"></i>
+                                style="width: 56px; height: 56px; background: var(--primary)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                                <i data-lucide="files" style="width: 28px; height: 28px; color: var(--primary);"></i>
                             </div>
-                            <h3 style="margin-bottom: 12px;">Upload 3 CSVs</h3>
-                            <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Standard mode using
+                            <h3 style="margin-bottom: 8px; font-size: 1.1rem;">Upload 3 CSVs</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); flex: 1;">Standard mode using
                                 people, mrr, and teaching files.</p>
                         </div>
 
-                        <!-- Option 2: Start from Scratch -->
-                        <div class="glass-card option-card" onclick="startManual()"
-                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px;">
+                        <!-- Option 2: Single CSV File -->
+                        <div class="glass-card option-card" onclick="showSingleUpload()"
+                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 20px;">
                             <div
-                                style="width: 64px; height: 64px; background: var(--accent)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
-                                <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--accent);"></i>
+                                style="width: 56px; height: 56px; background: var(--success)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                                <i data-lucide="file-spreadsheet" style="width: 28px; height: 28px; color: var(--success);"></i>
                             </div>
-                            <h3 style="margin-bottom: 12px;">Start from Scratch</h3>
-                            <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Begin with a clean slate
+                            <h3 style="margin-bottom: 8px; font-size: 1.1rem;">Single File Upload</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); flex: 1;">Upload a single consolidated
+                                input CSV or sample file.</p>
+                        </div>
+
+                        <!-- Option 3: Start from Scratch -->
+                        <div class="glass-card option-card" onclick="startManual()"
+                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 20px;">
+                            <div
+                                style="width: 56px; height: 56px; background: var(--accent)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                                <i data-lucide="sparkles" style="width: 28px; height: 28px; color: var(--accent);"></i>
+                            </div>
+                            <h3 style="margin-bottom: 8px; font-size: 1.1rem;">Start from Scratch</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); flex: 1;">Begin with a clean slate
                                 and enter staff details manually.</p>
                         </div>
 
-                        <!-- Option 3: Single File / Load Session -->
+                        <!-- Option 4: Load Session -->
                         <div class="glass-card option-card" onclick="showSingleUpload()"
-                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 24px;">
+                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 20px;">
                             <div
-                                style="width: 64px; height: 64px; background: var(--success)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
-                                <i data-lucide="file-up" style="width: 32px; height: 32px; color: var(--success);"></i>
+                                style="width: 56px; height: 56px; background: #8b5cf611; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                                <i data-lucide="folder-open" style="width: 28px; height: 28px; color: #8b5cf6;"></i>
                             </div>
-                            <h3 style="margin-bottom: 12px;">Load Saved Session</h3>
-                            <p style="font-size: 0.875rem; color: var(--text-muted); flex: 1;">Load a saved schedule session JSON or single CSV file.</p>
+                            <h3 style="margin-bottom: 8px; font-size: 1.1rem;">Load Session</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); flex: 1;">Restore a previously saved
+                                schedule JSON session.</p>
                         </div>
                     
                     </div>
@@ -222,7 +235,37 @@
                                 </button>
                             </div>
                         </div>
-                        <p style="margin-bottom: 20px; color: var(--text-muted);">
+                        <!-- Course Coverage Selection Box -->
+                        <div id="course-coverage-panel" style="background: var(--card-bg, #f8fafc); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i data-lucide="shield-check" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                                    <strong style="font-size: 0.95rem;">Courses Required to Cover</strong>
+                                </div>
+                                <div style="display: flex; gap: 8px; font-size: 0.75rem;">
+                                    <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 0.75rem;" onclick="selectAllCoursesUI(true)">Select All</button>
+                                    <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 0.75rem;" onclick="selectDetectedCoursesUI()">Only Detected</button>
+                                    <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 0.75rem;" onclick="selectAllCoursesUI(false)">Clear</button>
+                                </div>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                                Selected courses <strong>MUST</strong> be covered in every slot. If no primary instructor is scheduled in a slot, an MRR person will be assigned to cover it and labeled on the calendar.
+                            </p>
+                            <div id="course-chips-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                                <!-- Course chips injected dynamically -->
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="new-course-input" placeholder="Add custom course (e.g. MA 15300, STAT 30100)"
+                                    style="padding: 6px 12px; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); flex: 1;"
+                                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); addCustomCourseUI(); }">
+                                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="addCustomCourseUI()">
+                                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                                    Add Course
+                                </button>
+                            </div>
+                        </div>
+
+                        <p style="margin-bottom: 16px; color: var(--text-muted);">
                             Please verify the extracted instructor data before generating the schedule.
                         </p>
                         <div id="preview-list"
@@ -948,8 +991,86 @@
                     </div>
                 </div>
             `).join('');
+            renderCourseCoverageUI();
             lucide.createIcons();
         };
+
+        function renderCourseCoverageUI() {
+            const container = document.getElementById('course-chips-container');
+            if (!container) return;
+            
+            const scheduler = window.scheduler;
+            const available = scheduler.getAvailableCourses ? scheduler.getAvailableCourses() : [];
+            const detected = scheduler.getDetectedCourses ? scheduler.getDetectedCourses() : [];
+            const activeCore = (scheduler.state && scheduler.state.config && scheduler.state.config.coreCourses) || [];
+            const customCourses = (scheduler.state && scheduler.state.config && scheduler.state.config.customCoreCourses) || [];
+
+            container.innerHTML = available.map(course => {
+                const isSelected = activeCore.some(c => scheduler.normalizeCourse(c) === scheduler.normalizeCourse(course));
+                const isDetected = detected.some(d => scheduler.normalizeCourse(d) === scheduler.normalizeCourse(course));
+                const isCustom = customCourses.includes(course);
+
+                const borderCol = isSelected ? 'var(--primary)' : 'var(--border)';
+                const bgCol = isSelected ? 'rgba(99, 102, 241, 0.12)' : 'var(--bg)';
+                const textCol = isSelected ? 'var(--primary)' : 'var(--text)';
+
+                return `
+                    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; border: 1px solid ${borderCol}; background: ${bgCol}; cursor: pointer; transition: all 0.15s ease;"
+                         onclick="toggleCourseUI('${course}')" title="Click to ${isSelected ? 'uncheck' : 'require'} coverage for ${course}">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} style="cursor: pointer; pointer-events: none;" />
+                        <span style="font-weight: 700; font-size: 0.85rem; color: ${textCol};">${course}</span>
+                        ${isDetected ? '<span style="font-size: 0.65rem; background: var(--border); padding: 1px 5px; border-radius: 4px; color: var(--text-muted); font-weight: 600;">Taught</span>' : ''}
+                        ${isCustom ? `
+                            <button type="button" class="btn btn-ghost" style="padding: 0; margin-left: 2px; color: var(--danger); width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; line-height: 1;"
+                                    onclick="event.stopPropagation(); removeCustomCourseUI('${course}')" title="Delete custom course">
+                                &times;
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function toggleCourseUI(course) {
+            const scheduler = window.scheduler;
+            const activeCore = scheduler.state.config.coreCourses || [];
+            const currentlySelected = activeCore.some(c => scheduler.normalizeCourse(c) === scheduler.normalizeCourse(course));
+            scheduler.toggleRequiredCourse(course, !currentlySelected);
+            renderCourseCoverageUI();
+        }
+
+        function selectAllCoursesUI(selectAll) {
+            const scheduler = window.scheduler;
+            if (selectAll) {
+                scheduler.setRequiredCourses(scheduler.getAvailableCourses());
+            } else {
+                scheduler.setRequiredCourses([]);
+            }
+            renderCourseCoverageUI();
+        }
+
+        function selectDetectedCoursesUI() {
+            const scheduler = window.scheduler;
+            scheduler.setRequiredCourses(null); // resets to auto-detected
+            renderCourseCoverageUI();
+        }
+
+        function addCustomCourseUI() {
+            const input = document.getElementById('new-course-input');
+            if (!input) return;
+            const courseName = String(input.value || '').trim();
+            if (!courseName) return;
+            window.scheduler.addRequiredCourse(courseName);
+            input.value = '';
+            renderCourseCoverageUI();
+        }
+
+        function removeCustomCourseUI(course) {
+            window.scheduler.removeRequiredCourse(course);
+            renderCourseCoverageUI();
+        }
 
         function addConstraintUI(idx) {
             const day = document.getElementById(`add-day-${idx}`).value;
@@ -1440,18 +1561,22 @@
             const coreCourses = window.scheduler.state.config.coreCourses;
             if (!coreCourses || coreCourses.length === 0) return;
 
-            const normCore = coreCourses.map(c => normalizeCourse(c));
+            // Ensure core courses are sorted in numerical order
+            const sortedCore = [...coreCourses].sort((a, b) =>
+                String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+            );
+            const normCore = sortedCore.map(c => normalizeCourse(c));
 
             document.querySelectorAll('.grid-cell[id]').forEach(cell => {
                 const entries = Array.from(cell.querySelectorAll('.staff-card'));
                 const primaries = entries.filter(e => e.dataset.mrr === 'false').map(e => e.dataset.course);
                 const normPrimaries = primaries.map(p => normalizeCourse(p));
 
-                const missing = coreCourses.filter((c, idx) => {
+                const missing = sortedCore.filter((c, idx) => {
                     const nc = normCore[idx];
                     // Found if any primary course matches the core course
                     return !normPrimaries.some(np => np.includes(nc) || nc.includes(np));
-                });
+                }).sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }));
 
                 if (missing.length > 0) {
                     console.log(`Slot ${cell.id} missing: `, missing);
@@ -1461,6 +1586,7 @@
                 mrrs.forEach((mrr, i) => {
                     const share = Math.ceil(missing.length / mrrs.length);
                     const claims = missing.slice(i * share, (i + 1) * share);
+                    claims.sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }));
                     const tag = mrr.querySelector('.course-badge');
                     tag.innerText = claims.length > 0 ? `MRR / ${claims.join(', ')} ` : 'MRR/Gen';
                 });

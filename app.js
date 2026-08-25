@@ -11,8 +11,10 @@ class ShiftHappensScheduler {
             history: [],
             config: {
                 halfHourCourses: ['MA 15800', 'MA 16010', 'MA 16020'],
-                potentialCore: ['MA 15800', 'MA 16010', 'MA 16020', 'MA 16100', 'MA 16200', 'MA 26100', 'MA 16500', 'MA 16600'],
-                coreCourses: [], // Filtered core courses found in data
+                potentialCore: ['MA 15300', 'MA 15800', 'MA 16010', 'MA 16020', 'MA 16100', 'MA 16200', 'MA 26100', 'MA 16500', 'MA 16600'],
+                customCoreCourses: [],
+                selectedCoreCourses: null, // null = auto-detect from data; Array = user explicit selection
+                coreCourses: [], // Active required core courses found/selected for coverage
                 days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
                 slots: ["09:30", "10:30", "11:30", "12:30", "13:30", "14:30", "15:30", "16:30"],
                 slotsByDay: {
@@ -178,15 +180,118 @@ class ShiftHappensScheduler {
     }
 
 
-    computeCoreCourses() {
-        const normalizedPotential = this.state.config.potentialCore.map(c => this.normalizeCourse(c));
-        this.state.config.coreCourses = this.state.config.potentialCore.filter((core, idx) => {
-            const normCore = normalizedPotential[idx];
-            return this.state.instructors.some(inst => {
-                const normInst = this.normalizeCourse(inst.course);
-                return normInst.includes(normCore) || normCore.includes(normInst);
-            });
+    getDetectedCourses() {
+        const detected = new Set();
+        (this.state.instructors || []).forEach(inst => {
+            const c = String(inst.course || '').trim();
+            if (c && !inst.isMRR && !c.toUpperCase().startsWith('MRR')) {
+                detected.add(c);
+            }
         });
+        return Array.from(detected).sort((a, b) =>
+            String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+        );
+    }
+
+    getAvailableCourses() {
+        const all = new Set();
+        (this.state.config.potentialCore || []).forEach(c => all.add(String(c).trim()));
+        (this.state.config.customCoreCourses || []).forEach(c => all.add(String(c).trim()));
+        this.getDetectedCourses().forEach(c => all.add(c));
+        return Array.from(all).filter(Boolean).sort((a, b) =>
+            String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+        );
+    }
+
+    setRequiredCourses(courses) {
+        if (courses === null || courses === undefined) {
+            this.state.config.selectedCoreCourses = null;
+        } else {
+            const list = Array.isArray(courses) ? courses : [courses];
+            this.state.config.selectedCoreCourses = Array.from(
+                new Set(list.map(c => String(c || '').trim()).filter(Boolean))
+            );
+        }
+        this.computeCoreCourses();
+    }
+
+    addRequiredCourse(course) {
+        const clean = String(course || '').trim();
+        if (!clean) return;
+        if (!this.state.config.customCoreCourses) this.state.config.customCoreCourses = [];
+        if (!this.state.config.customCoreCourses.includes(clean)) {
+            this.state.config.customCoreCourses.push(clean);
+        }
+
+        const currentRequired = this.state.config.selectedCoreCourses !== null
+            ? [...this.state.config.selectedCoreCourses]
+            : this.getAutoDetectedCoreCourses();
+
+        if (!currentRequired.includes(clean)) {
+            currentRequired.push(clean);
+        }
+        this.state.config.selectedCoreCourses = Array.from(new Set(currentRequired));
+        this.computeCoreCourses();
+    }
+
+    removeRequiredCourse(course) {
+        const clean = String(course || '').trim();
+        if (!clean) return;
+        if (this.state.config.customCoreCourses) {
+            this.state.config.customCoreCourses = this.state.config.customCoreCourses.filter(c => c !== clean);
+        }
+        if (this.state.config.selectedCoreCourses !== null) {
+            this.state.config.selectedCoreCourses = this.state.config.selectedCoreCourses.filter(c => c !== clean);
+        }
+        this.computeCoreCourses();
+    }
+
+    toggleRequiredCourse(course, isSelected) {
+        const clean = String(course || '').trim();
+        if (!clean) return;
+        let currentRequired = this.state.config.selectedCoreCourses !== null
+            ? [...this.state.config.selectedCoreCourses]
+            : this.getAutoDetectedCoreCourses();
+
+        if (isSelected) {
+            if (!currentRequired.includes(clean)) currentRequired.push(clean);
+        } else {
+            currentRequired = currentRequired.filter(c => c !== clean);
+        }
+        this.state.config.selectedCoreCourses = Array.from(new Set(currentRequired));
+        this.computeCoreCourses();
+    }
+
+    getAutoDetectedCoreCourses() {
+        const detected = this.getDetectedCourses();
+        const auto = [];
+        (this.state.config.potentialCore || []).forEach(core => {
+            const normCore = this.normalizeCourse(core);
+            if (detected.some(d => {
+                const normD = this.normalizeCourse(d);
+                return normD.includes(normCore) || normCore.includes(normD);
+            })) {
+                auto.push(core);
+            }
+        });
+        detected.forEach(d => {
+            if (!auto.some(a => this.normalizeCourse(a) === this.normalizeCourse(d))) {
+                auto.push(d);
+            }
+        });
+        return Array.from(new Set(auto)).sort((a, b) =>
+            String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+        );
+    }
+
+    computeCoreCourses() {
+        if (Array.isArray(this.state.config.selectedCoreCourses)) {
+            this.state.config.coreCourses = [...this.state.config.selectedCoreCourses].sort((a, b) =>
+                String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+            );
+        } else {
+            this.state.config.coreCourses = this.getAutoDetectedCoreCourses();
+        }
     }
 
     getMissingCoreForEntries(entries) {
@@ -196,10 +301,14 @@ class ShiftHappensScheduler {
         const primaries = entries.filter(e => !e.isMRR).map(e => e.course);
         const normPrimaries = primaries.map(p => this.normalizeCourse(p));
 
-        return coreCourses.filter(core => {
+        const missing = coreCourses.filter(core => {
             const nc = this.normalizeCourse(core);
             return !normPrimaries.some(np => np.includes(nc) || nc.includes(np));
         });
+
+        return missing.sort((a, b) =>
+            String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+        );
     }
 
     slotNeedsMRR(d, t) {
@@ -490,6 +599,7 @@ class ShiftHappensScheduler {
 
         this.state.history = []; // Clear history on new generation
         this.state.instructors = finalInstructors;
+        this.computeCoreCourses();
 
         // Notify UI that data is ready for preview
         if (this.onPreview) this.onPreview(this.state);
@@ -897,12 +1007,14 @@ class ShiftHappensScheduler {
         });
 
         this.state.history = [];
+        this.computeCoreCourses();
         if (this.onPreview) this.onPreview(this.state);
     }
 
     startFromEmpty() {
         this.state.instructors = [];
         this.state.history = [];
+        this.computeCoreCourses();
         if (this.onPreview) this.onPreview(this.state);
     }
 
@@ -947,9 +1059,23 @@ class ShiftHappensScheduler {
         }
 
         if (data.config) {
+            const savedConfig = JSON.parse(JSON.stringify(data.config));
+            const mergedPotential = Array.from(new Set([
+                ...(this.state.config.potentialCore || []),
+                ...(savedConfig.potentialCore || [])
+            ]));
+            const mergedCustom = Array.from(new Set([
+                ...(this.state.config.customCoreCourses || []),
+                ...(savedConfig.customCoreCourses || [])
+            ]));
             this.state.config = {
                 ...this.state.config,
-                ...JSON.parse(JSON.stringify(data.config))
+                ...savedConfig,
+                potentialCore: mergedPotential,
+                customCoreCourses: mergedCustom,
+                selectedCoreCourses: Array.isArray(savedConfig.selectedCoreCourses)
+                    ? savedConfig.selectedCoreCourses
+                    : (Array.isArray(savedConfig.coreCourses) && savedConfig.coreCourses.length > 0 ? savedConfig.coreCourses : this.state.config.selectedCoreCourses)
             };
         }
 
