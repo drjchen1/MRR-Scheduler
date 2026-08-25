@@ -79,70 +79,55 @@
 
             <div class="content-body" id="app-body">
                 <!-- Landing State: Options -->
-                <div id="landing-stage" class="animate-fade-in" style="max-width: 800px; margin: 40px auto;">
-                    <div style="text-align: center; margin-bottom: 40px;">
-                        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--text); margin-bottom: 12px;">
-                            Welcome to Shift Happens</h1>
-                        <p style="color: var(--text-muted); font-size: 1.1rem;">Choose how you'd like to begin your
-                            scheduling session</p>
+                <div id="landing-stage" class="landing-container animate-fade-in">
+                    <div class="landing-header">
+                        <h1>Welcome to Shift Happens</h1>
+                        <p>Choose how you'd like to begin your scheduling session</p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div class="options-grid">
                         <!-- Option 1: 3 CSVs -->
-                        <div class="glass-card option-card" onclick="showTripleUpload()"
-                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 20px;">
-                            <div
-                                style="width: 56px; height: 56px; background: var(--primary)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                                <i data-lucide="files" style="width: 28px; height: 28px; color: var(--primary);"></i>
+                        <div class="glass-card option-card" onclick="showTripleUpload()">
+                            <div class="option-card-icon" style="background: var(--primary)15;">
+                                <i data-lucide="files" style="color: var(--primary);"></i>
                             </div>
-                            <h3 style="margin-bottom: 8px; font-size: 1.1rem;">Upload 3 CSVs</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); flex: 1;">Standard mode using
-                                people, mrr, and teaching files.</p>
+                            <h3>Upload 3 CSVs</h3>
+                            <p>Standard mode using people, mrr, and teaching files.</p>
                         </div>
 
                         <!-- Option 2: Single CSV File -->
-                        <div class="glass-card option-card" onclick="showSingleUpload()"
-                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 20px;">
-                            <div
-                                style="width: 56px; height: 56px; background: var(--success)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                                <i data-lucide="file-spreadsheet" style="width: 28px; height: 28px; color: var(--success);"></i>
+                        <div class="glass-card option-card" onclick="showSingleUpload()">
+                            <div class="option-card-icon" style="background: var(--success)15;">
+                                <i data-lucide="file-spreadsheet" style="color: var(--success);"></i>
                             </div>
-                            <h3 style="margin-bottom: 8px; font-size: 1.1rem;">Single File Upload</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); flex: 1;">Upload a single consolidated
-                                input CSV or sample file.</p>
+                            <h3>Single File Upload</h3>
+                            <p>Upload a single consolidated input CSV or sample file.</p>
                         </div>
 
                         <!-- Option 3: Start from Scratch -->
-                        <div class="glass-card option-card" onclick="startManual()"
-                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 20px;">
-                            <div
-                                style="width: 56px; height: 56px; background: var(--accent)11; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                                <i data-lucide="sparkles" style="width: 28px; height: 28px; color: var(--accent);"></i>
+                        <div class="glass-card option-card" onclick="startManual()">
+                            <div class="option-card-icon" style="background: var(--accent)15;">
+                                <i data-lucide="sparkles" style="color: var(--accent);"></i>
                             </div>
-                            <h3 style="margin-bottom: 8px; font-size: 1.1rem;">Start from Scratch</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); flex: 1;">Begin with a clean slate
-                                and enter staff details manually.</p>
+                            <h3>Start from Scratch</h3>
+                            <p>Begin with a clean slate and enter staff details manually.</p>
                         </div>
 
                         <!-- Option 4: Load Session -->
-                        <div class="glass-card option-card" onclick="showSingleUpload()"
-                            style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 20px;">
-                            <div
-                                style="width: 56px; height: 56px; background: #8b5cf611; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                                <i data-lucide="folder-open" style="width: 28px; height: 28px; color: #8b5cf6;"></i>
+                        <div class="glass-card option-card" onclick="showSingleUpload()">
+                            <div class="option-card-icon" style="background: #8b5cf618;">
+                                <i data-lucide="folder-open" style="color: #8b5cf6;"></i>
                             </div>
-                            <h3 style="margin-bottom: 8px; font-size: 1.1rem;">Load Session</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); flex: 1;">Restore a previously saved
-                                schedule JSON session.</p>
+                            <h3>Load Session</h3>
+                            <p>Restore a previously saved schedule JSON session.</p>
                         </div>
-                    
                     </div>
 
-                                        <div class="glass-card" id="schedule-config" style="margin-top: 32px; padding: 24px;">
-                        <h2 style="margin-bottom: 12px;">Schedule Time Slots</h2>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">Toggle the slots you want per day. Click Add to insert a custom time (HH:MM).</p>
+                    <div class="glass-card" id="schedule-config" style="margin-top: 24px; padding: 20px;">
+                        <h2 style="margin-bottom: 8px; font-size: 1.25rem;">Schedule Time Slots</h2>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 14px;">Toggle the slots you want per day. Click Add to insert a custom time (HH:MM).</p>
 
-                        <div id="schedule-days" style="display: grid; grid-template-columns: 1fr; gap: 14px;"></div>
+                        <div id="schedule-days" style="display: grid; grid-template-columns: 1fr; gap: 12px;"></div>
 
                         <div style="display: flex; gap: 12px; margin-top: 16px;">
                             <button class="btn btn-primary" onclick="applySlotConfig()">Apply</button>
@@ -150,8 +135,8 @@
                         </div>
                     </div>
 
-                    <div style="text-align: center; margin-top: 40px;">
-                        <button class="btn btn-ghost" onclick="downloadSample()" style="gap: 12px; padding: 12px 24px;">
+                    <div style="text-align: center; margin-top: 24px;">
+                        <button class="btn btn-ghost" onclick="downloadSample()" style="gap: 10px; padding: 10px 20px;">
                             <i data-lucide="download-cloud"></i>
                             <span>Download Sample Input Format</span>
                         </button>
