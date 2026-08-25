@@ -447,6 +447,25 @@ test('Missing core courses and MRR coverage lists are sorted in natural numerica
   assert.deepEqual([...missing], ['MA 15300', 'MA 15800', 'MA 16010', 'MA 16200', 'MA 26100']);
 });
 
+test('style.css and index.html contain letter-sized landscape print stylesheet without name truncation', () => {
+  const styleCssPath = path.join(__dirname, '..', 'style.css');
+  const indexHtmlPath = path.join(__dirname, '..', 'index.html');
+  const styleSource = fs.readFileSync(styleCssPath, 'utf8');
+  const indexSource = fs.readFileSync(indexHtmlPath, 'utf8');
+
+  // Verify @page configuration for letter landscape
+  assert.match(styleSource, /size:\s*letter\s+landscape;/i, 'style.css missing letter landscape page size');
+  assert.match(styleSource, /@media\s+print/i, 'style.css missing @media print');
+  assert.match(styleSource, /\.staff-name\s*\{[^}]*white-space:\s*normal/i, 'style.css should prevent staff name clipping in print mode');
+
+  // Verify index.html contains print button, print header, and print function
+  assert.match(indexSource, /printSchedule\(\)/, 'index.html missing printSchedule handler call');
+  assert.match(indexSource, /class="[^"]*print-header[^"]*"/, 'index.html missing print-header element');
+  assert.match(indexSource, /function\s+printSchedule\s*\(/, 'index.html missing printSchedule function definition');
+  assert.match(indexSource, /letter\s+landscape/, 'index.html exportHTML missing letter landscape page size');
+});
+
+
 
 
 

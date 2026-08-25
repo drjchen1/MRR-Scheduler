@@ -70,6 +70,10 @@
                             <i data-lucide="save"></i>
                             <span>Save Session</span>
                         </button>
+                        <button class="btn btn-ghost" onclick="printSchedule()" title="Print Schedule (Letter Paper)">
+                            <i data-lucide="printer"></i>
+                            <span>Print Schedule</span>
+                        </button>
                         <button class="btn btn-primary" onclick="exportHTML()">
                             <i data-lucide="download"></i>
                             <span>Export Schedule</span>
@@ -269,6 +273,10 @@
 
                 <!-- Schedule State -->
                 <div id="schedule-stage" class="hidden animate-fade-in" style="display: none;">
+                    <div class="print-header print-only">
+                        <h1>Shift Happens Schedule</h1>
+                        <span class="print-meta" id="print-timestamp"></span>
+                    </div>
                     <div id="schedule-alerts"
                         style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;"></div>
                     <div class="schedule-scroll">
@@ -1792,6 +1800,19 @@
             }
         }
 
+        function printSchedule() {
+            const hasSchedule = window.scheduler.state.schedule && Object.keys(window.scheduler.state.schedule).length > 0;
+            if (!hasSchedule) {
+                alert("Please make or load a schedule first before printing.");
+                return;
+            }
+            const printMeta = document.getElementById('print-timestamp');
+            if (printMeta) {
+                printMeta.innerText = `Generated on ${new Date().toLocaleDateString()}`;
+            }
+            window.print();
+        }
+
         function exportHTML() {
             const isFullMode = document.body.classList.contains('full-view-mode');
             const choice = confirm("Export Full View? (Cancel for Normal View)");
@@ -1900,6 +1921,8 @@ body {
 div[style*="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;"] {
     display: flex !important;
 }
+
+.print-only { display: none; }
 `;
 
             if (exportFull) {
@@ -1950,6 +1973,162 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
 `;
             }
 
+            inlinedCSS += `
+/* Print Styles for Letter-Sized Paper (Landscape) */
+@page {
+    size: letter landscape;
+    margin: 0.25in;
+}
+
+@media print {
+    *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-sizing: border-box !important;
+    }
+    html, body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        font-size: 11px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+    }
+    .no-print, button { display: none !important; }
+    .print-only { display: block !important; }
+    .print-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1.5px solid #0f172a;
+    }
+    .print-header h1 {
+        font-size: 13pt;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    .print-header .print-meta {
+        font-size: 8pt;
+        color: #475569;
+        font-weight: 500;
+    }
+    .schedule-grid {
+        display: grid !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        gap: 1px !important;
+        background: #94a3b8 !important;
+        border: 1.5px solid #475569 !important;
+        border-radius: 4px !important;
+        overflow: visible !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    .grid-header {
+        background: #1e293b !important;
+        color: #ffffff !important;
+        font-size: 8.5pt !important;
+        font-weight: 700 !important;
+        padding: 4px 6px !important;
+        text-align: center !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .grid-time {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        font-size: 8pt !important;
+        font-weight: 700 !important;
+        padding: 4px 2px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .grid-cell {
+        background: #ffffff !important;
+        min-height: 0 !important;
+        padding: 2px 3px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        overflow: visible !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .staff-card {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 3px !important;
+        padding: 2px 3px !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        cursor: default !important;
+        animation: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1px !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .staff-card-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1px !important;
+        width: 100% !important;
+    }
+    .course-badge {
+        font-size: 6.5pt !important;
+        font-weight: 800 !important;
+        color: #312e81 !important;
+        background: #e0e7ff !important;
+        border-radius: 2px !important;
+        padding: 0.5px 3px !important;
+        display: inline-block !important;
+        line-height: 1.2 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .staff-name {
+        font-size: 7.5pt !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        line-height: 1.2 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        display: block !important;
+        word-break: break-word !important;
+    }
+    .staff-card strong,
+    .staff-card .flex-between > span:not(.course-badge),
+    .staff-card div[style*="display: flex; gap: 8px; align-items: center;"] {
+        display: none !important;
+    }
+}
+`;
+
             // In Full View export, we need to abbreviate the names in the HTML we already got
             let finalGridHTML = gridHTML;
             if (exportFull) {
@@ -1980,6 +2159,16 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
     <style>${inlinedCSS}</style>
 </head>
 <body class="${exportFull ? 'full-view-mode' : ''}">
+    <div class="no-print" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.1rem; font-weight: 700;">Shift Happens Schedule</h2>
+        <button onclick="window.print()" style="padding: 6px 14px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+            Print Schedule (Letter Paper)
+        </button>
+    </div>
+    <div class="print-header print-only">
+        <h1>Shift Happens Schedule</h1>
+        <span class="print-meta">Exported on ${new Date().toLocaleDateString()}</span>
+    </div>
     <div class="schedule-grid" id="main-grid">
         ${finalGridHTML}
     </div>

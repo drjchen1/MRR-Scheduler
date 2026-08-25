@@ -534,3 +534,213 @@ body {
 .full-view-mode .staff-card div:not(.staff-card-header) {
     display: none !important;
 }
+
+/* Print Only and No Print Helpers */
+.print-only {
+    display: none;
+}
+
+/* Print Styles for Letter-Sized Paper (Landscape) */
+@page {
+    size: letter landscape;
+    margin: 0.25in;
+}
+
+@media print {
+    *,
+    *::before,
+    *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-sizing: border-box !important;
+    }
+
+    html, body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        font-size: 11px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* Hide non-printable application elements */
+    .sidebar,
+    .top-nav,
+    #landing-stage,
+    #upload-stage,
+    #single-upload-stage,
+    #preview-stage,
+    #schedule-alerts,
+    #schedule-summary,
+    #swap-modal,
+    .no-print,
+    button {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    .app-container,
+    .main-content,
+    .content-body,
+    #schedule-stage,
+    .schedule-scroll {
+        display: block !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    .print-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1.5px solid #0f172a;
+    }
+
+    .print-header h1 {
+        font-size: 13pt;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .print-header .print-meta {
+        font-size: 8pt;
+        color: #475569;
+        font-weight: 500;
+    }
+
+    /* Print Schedule Grid */
+    .schedule-grid {
+        display: grid !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        gap: 1px !important;
+        background: #94a3b8 !important;
+        border: 1.5px solid #475569 !important;
+        border-radius: 4px !important;
+        overflow: visible !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .grid-header {
+        background: #1e293b !important;
+        color: #ffffff !important;
+        font-size: 8.5pt !important;
+        font-weight: 700 !important;
+        padding: 4px 6px !important;
+        text-align: center !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .grid-time {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        font-size: 8pt !important;
+        font-weight: 700 !important;
+        padding: 4px 2px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .grid-cell {
+        background: #ffffff !important;
+        min-height: 0 !important;
+        padding: 2px 3px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        overflow: visible !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .staff-card {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 3px !important;
+        padding: 2px 3px !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        cursor: default !important;
+        animation: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1px !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .staff-card-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1px !important;
+        width: 100% !important;
+    }
+
+    .course-badge {
+        font-size: 6.5pt !important;
+        font-weight: 800 !important;
+        color: #312e81 !important;
+        background: #e0e7ff !important;
+        border-radius: 2px !important;
+        padding: 0.5px 3px !important;
+        display: inline-block !important;
+        line-height: 1.2 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .staff-name {
+        font-size: 7.5pt !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        line-height: 1.2 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        display: block !important;
+        word-break: break-word !important;
+    }
+
+    /* In print mode, hide interactive-only elements inside cards */
+    .staff-card strong,
+    .staff-card .flex-between > span:not(.course-badge),
+    .staff-card div[style*="display: flex; gap: 8px; align-items: center;"] {
+        display: none !important;
+    }
+}
