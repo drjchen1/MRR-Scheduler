@@ -194,6 +194,110 @@
                         </div>
                     </div>
 
+                    <!-- Optimization Priorities Card -->
+                    <div class="glass-card" id="optimization-priorities" style="margin-top: 24px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <h2 style="margin-bottom: 4px; font-size: 1.2rem;">Scheduling Priorities</h2>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">Choose a strategy, or fine-tune how the scheduler weighs different goals.</p>
+                            </div>
+                            <span id="opt-preset-badge" style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(99,102,241,0.12); color: var(--primary);">Balanced</span>
+                        </div>
+
+                        <!-- Strategy Presets -->
+                        <div class="preset-group" id="opt-strategy-group" style="margin-top: 12px; margin-bottom: 16px;">
+                            <button class="preset-btn active" id="opt-preset-balanced" onclick="applyOptimizationPreset('balanced')">
+                                <i data-lucide="sliders-horizontal" style="width: 13px; height: 13px;"></i> Balanced
+                            </button>
+                            <button class="preset-btn" id="opt-preset-staff_preferences" onclick="applyOptimizationPreset('staff_preferences')">
+                                <i data-lucide="heart" style="width: 13px; height: 13px;"></i> Staff Preference Focus
+                            </button>
+                            <button class="preset-btn" id="opt-preset-even_staffing" onclick="applyOptimizationPreset('even_staffing')">
+                                <i data-lucide="align-justify" style="width: 13px; height: 13px;"></i> Even Room Load
+                            </button>
+                            <button class="preset-btn" id="opt-preset-subject_coverage" onclick="applyOptimizationPreset('subject_coverage')">
+                                <i data-lucide="book-open" style="width: 13px; height: 13px;"></i> Subject Coverage Focus
+                            </button>
+                        </div>
+
+                        <p id="opt-preset-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; padding: 8px 12px; background: rgba(99,102,241,0.05); border-radius: 8px; border-left: 3px solid var(--primary);">
+                            Balances staff back-to-back preferences, room load balance, course variety, and required core coverage.
+                        </p>
+
+                        <!-- Individual Priority Controls -->
+                        <div class="priority-grid" id="priority-controls">
+
+                            <!-- Back-to-Back Shifts -->
+                            <div class="priority-card">
+                                <div class="priority-card-header">
+                                    <div class="priority-card-title">
+                                        <i data-lucide="repeat-2" style="width: 16px; height: 16px; color: var(--primary);"></i>
+                                        Back-to-Back Shifts
+                                    </div>
+                                </div>
+                                <p class="priority-desc">Honors instructor requests to group or spread out their teaching hours on the same day.</p>
+                                <div class="priority-options" id="b2b-options">
+                                    <button class="priority-pill" data-dim="backToBack" data-val="ignore" onclick="setOptWeight('backToBack','ignore')">Ignore</button>
+                                    <button class="priority-pill" data-dim="backToBack" data-val="low" onclick="setOptWeight('backToBack','low')">Flexible</button>
+                                    <button class="priority-pill" data-dim="backToBack" data-val="medium" onclick="setOptWeight('backToBack','medium')">Balanced</button>
+                                    <button class="priority-pill active" data-dim="backToBack" data-val="high" onclick="setOptWeight('backToBack','high')">High Priority</button>
+                                    <button class="priority-pill" data-dim="backToBack" data-val="strict" onclick="setOptWeight('backToBack','strict')">Strict</button>
+                                </div>
+                            </div>
+
+                            <!-- Room Staffing Balance -->
+                            <div class="priority-card">
+                                <div class="priority-card-header">
+                                    <div class="priority-card-title">
+                                        <i data-lucide="scale" style="width: 16px; height: 16px; color: var(--success);"></i>
+                                        Room Staffing Balance
+                                    </div>
+                                </div>
+                                <p class="priority-desc">Spreads instructors evenly across all operating hours to avoid crowded or empty rooms.</p>
+                                <div class="priority-options" id="balance-options">
+                                    <button class="priority-pill" data-dim="staffingBalance" data-val="low" onclick="setOptWeight('staffingBalance','low')">Flexible</button>
+                                    <button class="priority-pill active" data-dim="staffingBalance" data-val="medium" onclick="setOptWeight('staffingBalance','medium')">Balanced</button>
+                                    <button class="priority-pill" data-dim="staffingBalance" data-val="high" onclick="setOptWeight('staffingBalance','high')">Strictly Even</button>
+                                </div>
+                            </div>
+
+                            <!-- Course Diversity -->
+                            <div class="priority-card">
+                                <div class="priority-card-header">
+                                    <div class="priority-card-title">
+                                        <i data-lucide="layers" style="width: 16px; height: 16px; color: var(--accent);"></i>
+                                        Course Diversity in Room
+                                    </div>
+                                </div>
+                                <p class="priority-desc">Avoids placing multiple instructors teaching the exact same subject in the same time slot.</p>
+                                <div class="priority-options" id="diversity-options">
+                                    <button class="priority-pill" data-dim="courseDiversity" data-val="ignore" onclick="setOptWeight('courseDiversity','ignore')">Ignore</button>
+                                    <button class="priority-pill" data-dim="courseDiversity" data-val="low" onclick="setOptWeight('courseDiversity','low')">Low</button>
+                                    <button class="priority-pill active" data-dim="courseDiversity" data-val="medium" onclick="setOptWeight('courseDiversity','medium')">Encourage Variety</button>
+                                    <button class="priority-pill" data-dim="courseDiversity" data-val="high" onclick="setOptWeight('courseDiversity','high')">Strict Variety</button>
+                                </div>
+                            </div>
+
+                            <!-- Core Subject Coverage -->
+                            <div class="priority-card">
+                                <div class="priority-card-header">
+                                    <div class="priority-card-title">
+                                        <i data-lucide="shield-check" style="width: 16px; height: 16px; color: #f59e0b;"></i>
+                                        Core Subject Coverage
+                                    </div>
+                                </div>
+                                <p class="priority-desc">Ensures all required subjects have an instructor or MRR staff assigned in every time slot.</p>
+                                <div class="priority-options" id="coverage-options">
+                                    <button class="priority-pill" data-dim="coreCoverage" data-val="low" onclick="setOptWeight('coreCoverage','low')">Flexible</button>
+                                    <button class="priority-pill" data-dim="coreCoverage" data-val="medium" onclick="setOptWeight('coreCoverage','medium')">Standard</button>
+                                    <button class="priority-pill active" data-dim="coreCoverage" data-val="high" onclick="setOptWeight('coreCoverage','high')">High Priority</button>
+                                    <button class="priority-pill" data-dim="coreCoverage" data-val="strict" onclick="setOptWeight('coreCoverage','strict')">Strict Coverage</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
                     <div style="text-align: center; margin-top: 24px;">
                         <button class="btn btn-ghost" onclick="downloadSample()" style="gap: 10px; padding: 10px 20px;">
                             <i data-lucide="download-cloud"></i>
@@ -279,6 +383,19 @@
                                 </button>
                             </div>
                         </div>
+                        <!-- Compact Optimization Priorities Summary -->
+                        <div id="preview-priorities-summary" style="background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--primary);">
+                                <i data-lucide="sliders-horizontal" style="width: 14px; height: 14px;"></i>
+                                Scheduling Priorities:
+                            </div>
+                            <span id="preview-opt-badge" style="font-size: 0.78rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--primary); color: white;">Balanced</span>
+                            <div id="preview-priorities-chips" style="display: flex; gap: 6px; flex-wrap: wrap; flex: 1;"></div>
+                            <button class="btn btn-ghost" onclick="setAppStage('landing'); document.getElementById('optimization-priorities').scrollIntoView({behavior:'smooth', block:'start'});" style="padding: 3px 10px; font-size: 0.78rem; gap: 4px; margin-left: auto;">
+                                <i data-lucide="settings-2" style="width: 12px; height: 12px;"></i> Change
+                            </button>
+                        </div>
+
                         <!-- Course Coverage Selection Box -->
                         <div id="course-coverage-panel" style="background: var(--card-bg, #f8fafc); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
@@ -773,6 +890,108 @@
 
         loadConfigToUI();
 
+        // --- Optimization Priority Functions ---
+
+        const DIM_TO_OPTIONS_ID = {
+            backToBack: 'b2b-options',
+            staffingBalance: 'balance-options',
+            courseDiversity: 'diversity-options',
+            coreCoverage: 'coverage-options'
+        };
+
+        function applyOptimizationPreset(presetId) {
+            window.scheduler.setOptimizationPreset(presetId);
+            refreshOptimizationUI();
+        }
+
+        function setOptWeight(dimension, level) {
+            window.scheduler.setOptimizationWeights({ [dimension]: level });
+            refreshOptimizationUI();
+        }
+
+        function refreshOptimizationUI() {
+            const w = window.scheduler.state.config.weights || {};
+            const presets = window.scheduler.getWeightPresets ? window.scheduler.getWeightPresets() : {};
+            const scales = window.scheduler.getWeightScales ? window.scheduler.getWeightScales() : {};
+            const presetId = w.preset || 'balanced';
+            const preset = presets[presetId];
+
+            // Update strategy preset button active state
+            document.querySelectorAll('#opt-strategy-group .preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeStratBtn = document.getElementById(`opt-preset-${presetId}`);
+            if (activeStratBtn) activeStratBtn.classList.add('active');
+
+            // Update badge label
+            const badge = document.getElementById('opt-preset-badge');
+            if (badge) {
+                if (presetId === 'custom') {
+                    badge.textContent = 'Custom';
+                    badge.style.background = 'rgba(236,72,153,0.15)';
+                    badge.style.color = 'var(--accent)';
+                } else {
+                    badge.textContent = preset ? preset.name : 'Balanced';
+                    badge.style.background = 'rgba(99,102,241,0.12)';
+                    badge.style.color = 'var(--primary)';
+                }
+            }
+
+            // Update description
+            const desc = document.getElementById('opt-preset-desc');
+            if (desc) {
+                if (presetId === 'custom') {
+                    desc.textContent = 'Custom combination of scheduling priorities.';
+                } else if (preset) {
+                    desc.textContent = preset.description;
+                }
+            }
+
+            // Update individual pill active states
+            for (const [dim, optionsId] of Object.entries(DIM_TO_OPTIONS_ID)) {
+                const container = document.getElementById(optionsId);
+                if (!container) continue;
+                const currentVal = w[dim];
+                container.querySelectorAll('.priority-pill').forEach(pill => {
+                    if (pill.dataset.val === currentVal) {
+                        pill.classList.add('active');
+                    } else {
+                        pill.classList.remove('active');
+                    }
+                });
+            }
+
+            // Update preview stage summary
+            const previewBadge = document.getElementById('preview-opt-badge');
+            if (previewBadge) {
+                previewBadge.textContent = presetId === 'custom' ? 'Custom' : (preset ? preset.name : 'Balanced');
+            }
+
+            const previewChips = document.getElementById('preview-priorities-chips');
+            if (previewChips && scales) {
+                const chips = [];
+                const dims = [
+                    { key: 'backToBack', label: 'Back-to-Back', scale: scales.backToBack },
+                    { key: 'staffingBalance', label: 'Room Load', scale: scales.staffingBalance },
+                    { key: 'courseDiversity', label: 'Diversity', scale: scales.courseDiversity },
+                    { key: 'coreCoverage', label: 'Coverage', scale: scales.coreCoverage }
+                ];
+                dims.forEach(({ key, label, scale }) => {
+                    const val = w[key];
+                    const entry = scale && scale[val];
+                    if (entry) {
+                        chips.push(`<span style="font-size: 0.75rem; color: var(--text-muted); padding: 2px 8px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--border);">${label}: <strong style="color: var(--text);">${entry.label.replace(' (Default)', '')}</strong></span>`);
+                    }
+                });
+                previewChips.innerHTML = chips.join('');
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // Initialize UI from scheduler default weights on page load
+        refreshOptimizationUI();
+
         function setAppStage(stage) {
             const landing = document.getElementById('landing-stage');
             const upload = document.getElementById('upload-stage');
@@ -1025,6 +1244,9 @@
 
             if (typeof loadConfigToUI === 'function') {
                 loadConfigToUI();
+            }
+            if (typeof refreshOptimizationUI === 'function') {
+                refreshOptimizationUI();
             }
         };
 

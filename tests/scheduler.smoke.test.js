@@ -465,7 +465,110 @@ test('style.css and index.html contain letter-sized landscape print stylesheet w
   assert.match(indexSource, /letter\s+landscape/, 'index.html exportHTML missing letter landscape page size');
 });
 
+test('setOptimizationPreset applies correct levels for each built-in preset', () => {
+  const scheduler = createScheduler();
 
+  // Balanced (default) preset
+  scheduler.setOptimizationPreset('balanced');
+  assert.equal(scheduler.state.config.weights.preset, 'balanced');
+  assert.equal(scheduler.state.config.weights.backToBack, 'high');
+  assert.equal(scheduler.state.config.weights.staffingBalance, 'medium');
+  assert.equal(scheduler.state.config.weights.courseDiversity, 'medium');
+  assert.equal(scheduler.state.config.weights.coreCoverage, 'high');
 
+  // Staff Preference Focus
+  scheduler.setOptimizationPreset('staff_preferences');
+  assert.equal(scheduler.state.config.weights.backToBack, 'strict');
+  assert.equal(scheduler.state.config.weights.staffingBalance, 'low');
 
+  // Even Staffing
+  scheduler.setOptimizationPreset('even_staffing');
+  assert.equal(scheduler.state.config.weights.staffingBalance, 'high');
+  assert.equal(scheduler.state.config.weights.backToBack, 'low');
+
+  // Subject Coverage Focus
+  scheduler.setOptimizationPreset('subject_coverage');
+  assert.equal(scheduler.state.config.weights.coreCoverage, 'strict');
+  assert.equal(scheduler.state.config.weights.courseDiversity, 'high');
+
+  // Unknown preset returns false without modifying weights
+  const prevPreset = scheduler.state.config.weights.preset;
+  const prevB2B = scheduler.state.config.weights.backToBack;
+  const result = scheduler.setOptimizationPreset('nonexistent');
+  assert.equal(result, false);
+  assert.equal(scheduler.state.config.weights.preset, prevPreset);
+  assert.equal(scheduler.state.config.weights.backToBack, prevB2B);
+});
+
+test('setOptimizationWeights detects custom preset when combination does not match any named preset', () => {
+  const scheduler = createScheduler();
+
+  // Apply a mix that does not match any preset
+  scheduler.setOptimizationWeights({ backToBack: 'strict', staffingBalance: 'high', courseDiversity: 'ignore', coreCoverage: 'low' });
+  assert.equal(scheduler.state.config.weights.preset, 'custom');
+
+  // Apply the exact balanced combination and verify it is detected
+  scheduler.setOptimizationWeights({ backToBack: 'high', staffingBalance: 'medium', courseDiversity: 'medium', coreCoverage: 'high' });
+  assert.equal(scheduler.state.config.weights.preset, 'balanced');
+});
+
+test('getComputedWeights returns correct numeric values for the balanced preset', () => {
+  const scheduler = createScheduler();
+  scheduler.setOptimizationPreset('balanced');
+  const cw = scheduler.getComputedWeights();
+
+  // Balanced: backToBack=high → yesBonus 100, noPenalty 150; staffingBalance=medium → multiplier 25;
+  // courseDiversity=medium → bonus 80; coreCoverage=high → nonMRR 120, mrr 40
+  assert.equal(cw.b2bYesBonus, 100);
+  assert.equal(cw.b2bNoPenalty, 150);
+  assert.equal(cw.balanceMultiplier, 25);
+  assert.equal(cw.diversityBonus, 80);
+  assert.equal(cw.coverageNonMRRBonus, 120);
+  assert.equal(cw.coverageMRRBonus, 40);
+});
+
+test('getComputedWeights reflects strict b2b preset values for staff_preferences preset', () => {
+  const scheduler = createScheduler();
+  scheduler.setOptimizationPreset('staff_preferences');
+  const cw = scheduler.getComputedWeights();
+
+  // staff_preferences: backToBack=strict → yesBonus 250, noPenalty 350
+  assert.equal(cw.b2bYesBonus, 250);
+  assert.equal(cw.b2bNoPenalty, 350);
+});
+
+test('exportSessionJSON and importSessionJSON preserve custom optimization weights', () => {
+  const scheduler = createScheduler();
+
+  scheduler.setScheduleConfig(['Mon'], [], { Mon: ['09:30'] });
+  scheduler.setOptimizationWeights({ backToBack: 'strict', staffingBalance: 'high', courseDiversity: 'ignore', coreCoverage: 'strict' });
+
+  const json = scheduler.exportSessionJSON();
+  const parsed = JSON.parse(json);
+
+  // Exported JSON should contain the weights
+  assert.ok(parsed.config.weights, 'exported config should have weights');
+  assert.equal(parsed.config.weights.backToBack, 'strict');
+  assert.equal(parsed.config.weights.coreCoverage, 'strict');
+
+  // Importing into a fresh scheduler should restore the same weights
+  const scheduler2 = createScheduler();
+  scheduler2.importSessionJSON(json);
+  assert.equal(scheduler2.state.config.weights.backToBack, 'strict');
+  assert.equal(scheduler2.state.config.weights.staffingBalance, 'high');
+  assert.equal(scheduler2.state.config.weights.courseDiversity, 'ignore');
+  assert.equal(scheduler2.state.config.weights.coreCoverage, 'strict');
+});
+
+test('index.html contains optimization priority UI elements and JS functions', () => {
+  const indexHtmlPath = path.join(__dirname, '..', 'index.html');
+  const source = fs.readFileSync(indexHtmlPath, 'utf8');
+
+  assert.match(source, /id="optimization-priorities"/, 'missing optimization-priorities card');
+  assert.match(source, /applyOptimizationPreset\(/, 'missing applyOptimizationPreset function');
+  assert.match(source, /setOptWeight\(/, 'missing setOptWeight function');
+  assert.match(source, /refreshOptimizationUI\(/, 'missing refreshOptimizationUI function');
+  assert.match(source, /id="opt-preset-balanced"/, 'missing Balanced preset button');
+  assert.match(source, /id="preview-priorities-summary"/, 'missing preview stage priorities summary');
+});
 

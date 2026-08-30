@@ -1,7 +1,72 @@
-/**
- * Shift Happens Core Logic
- * Unified implementation of legacy Python scripts
- */
+const OPTIMIZATION_PRESETS = {
+    balanced: {
+        id: 'balanced',
+        name: 'Balanced',
+        badge: 'Recommended',
+        description: 'Balances staff back-to-back preferences, room load balance, course variety, and required core coverage.',
+        backToBack: 'high',
+        staffingBalance: 'medium',
+        courseDiversity: 'medium',
+        coreCoverage: 'high'
+    },
+    staff_preferences: {
+        id: 'staff_preferences',
+        name: 'Staff Preference Focus',
+        badge: 'Staff First',
+        description: 'Strongly prioritizes honoring consecutive/spaced shift preferences over equal room load distribution.',
+        backToBack: 'strict',
+        staffingBalance: 'low',
+        courseDiversity: 'low',
+        coreCoverage: 'medium'
+    },
+    even_staffing: {
+        id: 'even_staffing',
+        name: 'Even Room Load',
+        badge: 'Even Distribution',
+        description: 'Strictly equalizes instructor headcount across all operating hours, giving lower weight to back-to-back preferences.',
+        backToBack: 'low',
+        staffingBalance: 'high',
+        courseDiversity: 'medium',
+        coreCoverage: 'medium'
+    },
+    subject_coverage: {
+        id: 'subject_coverage',
+        name: 'Subject Coverage Focus',
+        badge: 'Coverage First',
+        description: 'Maximizes room subject diversity and ensures every required core course is staffed in every single time slot.',
+        backToBack: 'medium',
+        staffingBalance: 'medium',
+        courseDiversity: 'high',
+        coreCoverage: 'strict'
+    }
+};
+
+const WEIGHT_SCALES = {
+    backToBack: {
+        ignore: { yesBonus: 0, noPenalty: 0, label: 'Ignore', description: 'Disregards consecutive shift requests' },
+        low: { yesBonus: 30, noPenalty: 40, label: 'Flexible', description: 'Minor preference for consecutive/spaced shifts' },
+        medium: { yesBonus: 60, noPenalty: 90, label: 'Balanced', description: 'Moderate priority for consecutive/spaced shifts' },
+        high: { yesBonus: 100, noPenalty: 150, label: 'High Priority (Default)', description: 'Strong priority for consecutive/spaced shifts' },
+        strict: { yesBonus: 250, noPenalty: 350, label: 'Strict', description: 'Maximum priority to honor consecutive/spaced requests' }
+    },
+    staffingBalance: {
+        low: { multiplier: 10, label: 'Flexible', description: 'Allows uneven headcount if other priorities benefit' },
+        medium: { multiplier: 25, label: 'Balanced (Default)', description: 'Balances staffing load across all operating hours' },
+        high: { multiplier: 60, label: 'Strictly Even', description: 'Strictly equalizes instructor count across all slots' }
+    },
+    courseDiversity: {
+        ignore: { bonus: 0, label: 'Ignore', description: 'Allows stacking same courses in same slot' },
+        low: { bonus: 40, label: 'Low', description: 'Slight preference for course variety' },
+        medium: { bonus: 80, label: 'Encourage Variety (Default)', description: 'Strongly encourages different courses in room' },
+        high: { bonus: 140, label: 'Strict Variety', description: 'Maximum effort to diversify courses in each room' }
+    },
+    coreCoverage: {
+        low: { nonMRR: 60, mrr: 20, label: 'Flexible', description: 'Basic effort to cover required core courses' },
+        medium: { nonMRR: 80, mrr: 30, label: 'Standard', description: 'Solid priority for core course coverage' },
+        high: { nonMRR: 120, mrr: 40, label: 'High Priority (Default)', description: 'Strong priority to cover core courses in every slot' },
+        strict: { nonMRR: 200, mrr: 80, label: 'Strict Coverage', description: 'Maximum priority to fill all core subjects' }
+    }
+};
 
 class ShiftHappensScheduler {
     constructor() {
@@ -15,6 +80,13 @@ class ShiftHappensScheduler {
                 customCoreCourses: [],
                 selectedCoreCourses: null, // null = auto-detect from data; Array = user explicit selection
                 coreCourses: [], // Active required core courses found/selected for coverage
+                weights: {
+                    preset: 'balanced',
+                    backToBack: 'high',
+                    staffingBalance: 'medium',
+                    courseDiversity: 'medium',
+                    coreCoverage: 'high'
+                },
                 days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
                 slots: ["09:30", "10:30", "11:30", "12:30", "13:30", "14:30", "15:30", "16:30"],
                 slotsByDay: {
@@ -27,6 +99,82 @@ class ShiftHappensScheduler {
             }
         };
         this.dayRank = { 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5 };
+    }
+
+    // --- Optimization Strategy & Weight Management ---
+    getWeightPresets() {
+        return OPTIMIZATION_PRESETS;
+    }
+
+    getWeightScales() {
+        return WEIGHT_SCALES;
+    }
+
+    setOptimizationPreset(presetId) {
+        const preset = OPTIMIZATION_PRESETS[presetId];
+        if (!preset) return false;
+        this.state.config.weights = {
+            preset: preset.id,
+            backToBack: preset.backToBack,
+            staffingBalance: preset.staffingBalance,
+            courseDiversity: preset.courseDiversity,
+            coreCoverage: preset.coreCoverage
+        };
+        return true;
+    }
+
+    setOptimizationWeights(weights = {}) {
+        const current = this.state.config.weights || {
+            preset: 'balanced',
+            backToBack: 'high',
+            staffingBalance: 'medium',
+            courseDiversity: 'medium',
+            coreCoverage: 'high'
+        };
+
+        const updated = {
+            ...current,
+            ...weights
+        };
+
+        // Determine if matches a known preset or is custom
+        let matchedPreset = 'custom';
+        for (const [id, p] of Object.entries(OPTIMIZATION_PRESETS)) {
+            if (
+                p.backToBack === updated.backToBack &&
+                p.staffingBalance === updated.staffingBalance &&
+                p.courseDiversity === updated.courseDiversity &&
+                p.coreCoverage === updated.coreCoverage
+            ) {
+                matchedPreset = id;
+                break;
+            }
+        }
+        updated.preset = weights.preset || matchedPreset;
+        this.state.config.weights = updated;
+        return this.state.config.weights;
+    }
+
+    getComputedWeights() {
+        const w = (this.state.config && this.state.config.weights) || {};
+        const b2bLevel = w.backToBack || 'high';
+        const balLevel = w.staffingBalance || 'medium';
+        const divLevel = w.courseDiversity || 'medium';
+        const covLevel = w.coreCoverage || 'high';
+
+        const b2b = (WEIGHT_SCALES.backToBack[b2bLevel] || WEIGHT_SCALES.backToBack.high);
+        const bal = (WEIGHT_SCALES.staffingBalance[balLevel] || WEIGHT_SCALES.staffingBalance.medium);
+        const div = (WEIGHT_SCALES.courseDiversity[divLevel] || WEIGHT_SCALES.courseDiversity.medium);
+        const cov = (WEIGHT_SCALES.coreCoverage[covLevel] || WEIGHT_SCALES.coreCoverage.high);
+
+        return {
+            balanceMultiplier: bal.multiplier,
+            diversityBonus: div.bonus,
+            coverageNonMRRBonus: cov.nonMRR,
+            coverageMRRBonus: cov.mrr,
+            b2bYesBonus: b2b.yesBonus,
+            b2bNoPenalty: b2b.noPenalty
+        };
     }
 
     // --- Helpers ---
@@ -344,13 +492,16 @@ class ShiftHappensScheduler {
     fillUnderAssigned() {
         const { days } = this.state.config;
         const schedule = this.state.schedule;
+        const weights = this.getComputedWeights();
 
         const getScore = (person, d, t) => {
-            let score = (schedule[d][t].length ** 2) * 25;
+            let score = (schedule[d][t].length ** 2) * weights.balanceMultiplier;
 
-            if (!schedule[d][t].some(s => s.course === person.course)) score -= 80;
+            if (weights.diversityBonus > 0 && !schedule[d][t].some(s => s.course === person.course)) {
+                score -= weights.diversityBonus;
+            }
 
-            if (!person.isMRR) {
+            if (!person.isMRR && (weights.coverageNonMRRBonus > 0 || weights.coverageMRRBonus > 0)) {
                 const missing = this.getMissingCoreForEntries(schedule[d][t] || []);
                 const hasMRR = (schedule[d][t] || []).some(s => s.isMRR);
                 const isCore = (this.state.config.coreCourses || []).some(core => {
@@ -363,7 +514,7 @@ class ShiftHappensScheduler {
                     const np = this.normalizeCourse(person.course);
                     return np.includes(nm) || nm.includes(np);
                 })) {
-                    score -= hasMRR ? 40 : 120;
+                    score -= hasMRR ? weights.coverageMRRBonus : weights.coverageNonMRRBonus;
                 }
             }
 
@@ -376,8 +527,8 @@ class ShiftHappensScheduler {
                 return Math.abs(tIdx - atIdx) === 1;
             });
 
-            if (person.pref === 'Yes' && hasAdjacent) score -= 100;
-            else if (person.pref === 'No' && hasAdjacent) score += 150;
+            if (person.pref === 'Yes' && hasAdjacent && weights.b2bYesBonus > 0) score -= weights.b2bYesBonus;
+            else if (person.pref === 'No' && hasAdjacent && weights.b2bNoPenalty > 0) score += weights.b2bNoPenalty;
 
             return score;
         };
@@ -711,6 +862,7 @@ class ShiftHappensScheduler {
         const staffQueue = [...this.state.instructors].sort((a, b) => b.required - a.required);
 
         const maxReq = Math.max(...staffQueue.map(s => s.required), 0);
+        const weights = this.getComputedWeights();
         for (let round = 0; round < maxReq; round++) {
             for (const person of staffQueue) {
                 if (person.assigned >= person.required) continue;
@@ -721,13 +873,15 @@ class ShiftHappensScheduler {
                         const slotId = `${d} ${t}`;
                         if (person.unavail.includes(slotId) || person.assignments.includes(slotId)) return;
 
-                        let score = (schedule[d][t].length ** 2) * 25;
+                        let score = (schedule[d][t].length ** 2) * weights.balanceMultiplier;
 
                         // Favor course variety in the room
-                        if (!schedule[d][t].some(s => s.course === person.course)) score -= 80;
+                        if (weights.diversityBonus > 0 && !schedule[d][t].some(s => s.course === person.course)) {
+                            score -= weights.diversityBonus;
+                        }
 
                         // Coverage bonus for core courses (prefer filling missing core coverage)
-                        if (!person.isMRR) {
+                        if (!person.isMRR && (weights.coverageNonMRRBonus > 0 || weights.coverageMRRBonus > 0)) {
                             const missing = this.getMissingCoreForEntries(schedule[d][t] || []);
                             const hasMRR = (schedule[d][t] || []).some(s => s.isMRR);
                             const isCore = (this.state.config.coreCourses || []).some(core => {
@@ -740,11 +894,11 @@ class ShiftHappensScheduler {
                                 const np = this.normalizeCourse(person.course);
                                 return np.includes(nm) || nm.includes(np);
                             })) {
-                                score -= hasMRR ? 40 : 120;
+                                score -= hasMRR ? weights.coverageMRRBonus : weights.coverageNonMRRBonus;
                             }
                         }
 
-                        // NEW: Back-to-Back Preference logic
+                        // Back-to-Back Preference logic
                         const slotsForDay = this.getSlotsForDay(d);
                         const tIdx = slotsForDay.indexOf(t);
                         const hasAdjacent = person.assignments.some(a => {
@@ -754,10 +908,10 @@ class ShiftHappensScheduler {
                             return Math.abs(tIdx - atIdx) === 1;
                         });
 
-                        if (person.pref === 'Yes' && hasAdjacent) {
-                            score -= 100; // Strong priority to stick together
-                        } else if (person.pref === 'No' && hasAdjacent) {
-                            score += 150; // Strong penalty for back-to-back if they hate it
+                        if (person.pref === 'Yes' && hasAdjacent && weights.b2bYesBonus > 0) {
+                            score -= weights.b2bYesBonus; // Priority to stick together
+                        } else if (person.pref === 'No' && hasAdjacent && weights.b2bNoPenalty > 0) {
+                            score += weights.b2bNoPenalty; // Penalty for back-to-back if they hate it
                         }
 
                         possible.push({ score, d, t });
@@ -1068,9 +1222,16 @@ class ShiftHappensScheduler {
                 ...(this.state.config.customCoreCourses || []),
                 ...(savedConfig.customCoreCourses || [])
             ]));
+            if (savedConfig.weights) {
+                this.state.config.weights = {
+                    ...this.state.config.weights,
+                    ...savedConfig.weights
+                };
+            }
             this.state.config = {
                 ...this.state.config,
                 ...savedConfig,
+                weights: this.state.config.weights,
                 potentialCore: mergedPotential,
                 customCoreCourses: mergedCustom,
                 selectedCoreCourses: Array.isArray(savedConfig.selectedCoreCourses)
@@ -1191,9 +1352,12 @@ class ShiftHappensScheduler {
 
     getAssignmentQuality(person, d, t) {
         const schedule = this.state.schedule;
-        let score = (schedule[d][t].length ** 2) * 25;
+        const weights = this.getComputedWeights();
+        let score = (schedule[d][t].length ** 2) * weights.balanceMultiplier;
 
-        if (!schedule[d][t].some(s => s.name !== person.name && s.course === person.course)) score -= 80;
+        if (weights.diversityBonus > 0 && !schedule[d][t].some(s => s.name !== person.name && s.course === person.course)) {
+            score -= weights.diversityBonus;
+        }
 
         const slotsForDay = this.getSlotsForDay(d);
         const tIdx = slotsForDay.indexOf(t);
@@ -1204,8 +1368,8 @@ class ShiftHappensScheduler {
             return Math.abs(tIdx - atIdx) === 1;
         });
 
-        if (person.pref === 'Yes' && hasAdjacent) score -= 100;
-        else if (person.pref === 'No' && hasAdjacent) score += 150;
+        if (person.pref === 'Yes' && hasAdjacent && weights.b2bYesBonus > 0) score -= weights.b2bYesBonus;
+        else if (person.pref === 'No' && hasAdjacent && weights.b2bNoPenalty > 0) score += weights.b2bNoPenalty;
 
         return score;
     }

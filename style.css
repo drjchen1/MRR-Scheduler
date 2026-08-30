@@ -749,8 +749,91 @@ body {
     display: none;
 }
 
-.full-view-mode .staff-card div:not(.staff-card-header) {
-    display: none !important;
+/* Optimization Priorities & Strategy Cards */
+.priority-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.priority-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.priority-card:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.priority-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.priority-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.priority-card-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--primary);
+}
+
+.priority-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    min-height: 2.4em;
+}
+
+.priority-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.priority-pill {
+    padding: 5px 11px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--text);
+    user-select: none;
+}
+
+.priority-pill:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.08);
+}
+
+.priority-pill.active {
+    background: var(--primary);
+    color: #ffffff !important;
+    border-color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
 }
 
 /* Print Only and No Print Helpers */
