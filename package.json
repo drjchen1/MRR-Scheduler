@@ -1,9 +1,0 @@
-{
-  "name": "shift-happens",
-  "private": true,
-  "version": "1.0.0",
-  "description": "Smoke tests for Shift Happens scheduler",
-  "scripts": {
-    "test": "node --test tests/*.test.js"
-  }
-}
