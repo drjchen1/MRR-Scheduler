@@ -37,19 +37,28 @@
         <main class="main-content">
             <header class="top-nav">
                 <!-- 1. Landing / Setup Navigation -->
-                <div id="nav-landing-actions" class="nav-container landing-nav">
+                <div id="nav-landing-actions" class="nav-container">
                     <div class="nav-brand">
                         <div class="brand-icon">
                             <i data-lucide="calendar" style="color: var(--primary); width: 22px; height: 22px;"></i>
                         </div>
                         <div>
                             <span class="brand-title">Shift Happens</span>
+                            <span class="brand-subtitle">Dynamic Staffing Dashboard</span>
                         </div>
                     </div>
                     <div class="nav-actions">
-                        <span class="landing-nav-context">Dynamic Staffing Dashboard</span>
-                        <button class="btn btn-ghost landing-theme-button" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">
+                        <button class="btn btn-ghost" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
                             <i data-lucide="sun" id="theme-icon-landing"></i>
+                            <span class="btn-text">Theme</span>
+                        </button>
+                        <a href="Shift_Happens_Help.html" target="_blank" class="btn btn-ghost" title="Open User Guide & Handbook">
+                            <i data-lucide="help-circle"></i>
+                            <span class="btn-text">User Guide</span>
+                        </a>
+                        <button class="btn btn-ghost" onclick="downloadSample()" title="Download Sample Input CSV Template">
+                            <i data-lucide="download-cloud"></i>
+                            <span class="btn-text">Sample CSV</span>
                         </button>
                     </div>
                 </div>
@@ -116,27 +125,27 @@
                 <!-- Landing State: Options -->
                 <div id="landing-stage" class="landing-container animate-fade-in">
                     <div class="landing-header">
-                        <h1>Start a scheduling session</h1>
-                        <p>Choose the quickest path for the information you already have.</p>
+                        <h1>Welcome to Shift Happens</h1>
+                        <p>Choose how you'd like to begin your scheduling session</p>
                     </div>
 
                     <div class="options-grid">
-                        <!-- Option 1: consolidated CSV -->
-                        <div class="glass-card option-card option-card-primary" onclick="showSingleUpload()">
-                            <div class="option-card-icon" style="background: var(--success)15;">
-                                <i data-lucide="upload" style="color: var(--success);"></i>
-                            </div>
-                            <h3>Upload a roster</h3>
-                            <p>Use one consolidated CSV. This is the fastest path for most scheduling runs.</p>
-                        </div>
-
-                        <!-- Option 2: 3 CSVs -->
+                        <!-- Option 1: 3 CSVs -->
                         <div class="glass-card option-card" onclick="showTripleUpload()">
                             <div class="option-card-icon" style="background: var(--primary)15;">
                                 <i data-lucide="files" style="color: var(--primary);"></i>
                             </div>
-                            <h3>Use three source files</h3>
-                            <p>For the departmental people, teaching, and MRR workflow.</p>
+                            <h3>Upload 3 CSVs</h3>
+                            <p>Standard mode using people, mrr, and teaching files.</p>
+                        </div>
+
+                        <!-- Option 2: Single CSV File -->
+                        <div class="glass-card option-card" onclick="showSingleUpload()">
+                            <div class="option-card-icon" style="background: var(--success)15;">
+                                <i data-lucide="file-spreadsheet" style="color: var(--success);"></i>
+                            </div>
+                            <h3>Single File Upload</h3>
+                            <p>Upload a single consolidated input CSV or sample file.</p>
                         </div>
 
                         <!-- Option 3: Start from Scratch -->
@@ -144,21 +153,21 @@
                             <div class="option-card-icon" style="background: var(--accent)15;">
                                 <i data-lucide="sparkles" style="color: var(--accent);"></i>
                             </div>
-                            <h3>Build manually</h3>
-                            <p>Create a new roster and availability schedule from scratch.</p>
+                            <h3>Start from Scratch</h3>
+                            <p>Begin with a clean slate and enter staff details manually.</p>
+                        </div>
+
+                        <!-- Option 4: Load Session -->
+                        <div class="glass-card option-card" onclick="showSingleUpload()">
+                            <div class="option-card-icon" style="background: #8b5cf618;">
+                                <i data-lucide="folder-open" style="color: #8b5cf6;"></i>
+                            </div>
+                            <h3>Load Session</h3>
+                            <p>Restore a previously saved schedule JSON session.</p>
                         </div>
                     </div>
 
-                    <div class="landing-secondary-actions">
-                        <span>or continue work already in progress</span>
-                        <div>
-                            <button class="btn btn-ghost" onclick="showSessionUpload()"><i data-lucide="folder-open"></i> Load saved session</button>
-                            <a class="btn btn-ghost" href="sample_math_practice.csv" download><i data-lucide="download-cloud"></i> Try sample schedule</a>
-                            <a href="Shift_Happens_Help.html" target="_blank" class="btn btn-ghost"><i data-lucide="help-circle"></i> View guide</a>
-                        </div>
-                    </div>
-
-                    <div class="glass-card setup-controls-hidden" id="schedule-config" style="margin-top: 24px; padding: 20px;">
+                    <div class="glass-card" id="schedule-config" style="margin-top: 24px; padding: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                             <div>
                                 <h2 style="margin-bottom: 4px; font-size: 1.2rem;">Operating Hours & Time Slots</h2>
@@ -186,7 +195,7 @@
                     </div>
 
                     <!-- Optimization Priorities Card -->
-                    <div class="glass-card setup-controls-hidden" id="optimization-priorities" style="margin-top: 24px; padding: 20px;">
+                    <div class="glass-card" id="optimization-priorities" style="margin-top: 24px; padding: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                             <div>
                                 <h2 style="margin-bottom: 4px; font-size: 1.2rem;">Scheduling Priorities</h2>
@@ -289,6 +298,12 @@
                         </div>
                     </div>
 
+                    <div style="text-align: center; margin-top: 24px;">
+                        <button class="btn btn-ghost" onclick="downloadSample()" style="gap: 10px; padding: 10px 20px;">
+                            <i data-lucide="download-cloud"></i>
+                            <span>Download Sample Input Format</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Triple Upload Stage -->
@@ -327,14 +342,15 @@
                             <button class="btn btn-ghost" onclick="backToLanding()">
                                 <i data-lucide="arrow-left"></i>
                             </button>
-                            <h2 id="single-upload-title">Upload a roster CSV</h2>
+                            <h2>Upload Saved Session or Input File</h2>
                         </div>
-                        <div class="upload-zone" id="single-dropzone">
+                        <div class="upload-zone" id="single-dropzone"
+                            onclick="document.getElementById('single-file-input').click()">
                             <i data-lucide="file-text"
                                 style="width: 48px; height: 48px; color: var(--success); margin-bottom: 16px;"></i>
-                            <p id="single-upload-action" style="font-weight: 600;">Click or drag to upload your consolidated CSV</p>
-                            <p id="single-upload-description" style="font-size: 0.875rem; color: var(--text-muted); margin-top: 8px;">
-                                Include instructors, courses, required hours, preferences, and unavailability.
+                            <p style="font-weight: 600;">Click or drag to upload session (.json) or input (.csv)</p>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 8px;">
+                                Previously saved schedule session JSON or sample CSV data
                             </p>
                             <input type="file" id="single-file-input" accept=".json,.csv" style="display: none;">
                         </div>
@@ -348,10 +364,7 @@
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px;">
                             <div style="display: flex; align-items: center; gap: 16px;">
-                                <div>
-                                    <p class="review-step-label">Step 2 of 4</p>
-                                    <h2>Review your roster</h2>
-                                </div>
+                                <h2>Data Preview</h2>
                                 <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.8rem;"
                                     onclick="addInstructorUI()">
                                     <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
@@ -359,6 +372,11 @@
                                 </button>
                             </div>
                             <div style="display: flex; align-items: center; gap: 12px;">
+                                <button class="btn btn-primary" id="make-schedule-btn"
+                                    style="height: 36px; font-size: 0.9rem;">
+                                    <i data-lucide="calendar"></i>
+                                    Make Schedule
+                                </button>
                                 <button class="btn btn-ghost" onclick="backToLanding()">
                                     <i data-lucide="arrow-left"></i>
                                     Back
@@ -373,25 +391,9 @@
                             </div>
                             <span id="preview-opt-badge" style="font-size: 0.78rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--primary); color: white;">Balanced</span>
                             <div id="preview-priorities-chips" style="display: flex; gap: 6px; flex-wrap: wrap; flex: 1;"></div>
-                            <button class="btn btn-ghost" onclick="document.getElementById('schedule-setup').scrollIntoView({behavior:'smooth', block:'start'});" style="padding: 3px 10px; font-size: 0.78rem; gap: 4px; margin-left: auto;">
+                            <button class="btn btn-ghost" onclick="setAppStage('landing'); document.getElementById('optimization-priorities').scrollIntoView({behavior:'smooth', block:'start'});" style="padding: 3px 10px; font-size: 0.78rem; gap: 4px; margin-left: auto;">
                                 <i data-lucide="settings-2" style="width: 12px; height: 12px;"></i> Change
                             </button>
-                        </div>
-
-                        <p style="margin-bottom: 16px; color: var(--text-muted);">
-                            Verify the extracted instructor data before configuring and generating the schedule.
-                        </p>
-                        <div id="preview-list"
-                            style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; padding-right: 8px;">
-                            <!-- Preview items will be injected here -->
-                        </div>
-
-                        <div id="schedule-setup" class="schedule-setup-section">
-                            <div class="schedule-setup-heading">
-                                <p class="review-step-label">Step 3 of 4</p>
-                                <h2>Configure this schedule</h2>
-                                <p>Set operating hours, scheduling priorities, and required course coverage.</p>
-                            </div>
                         </div>
 
                         <!-- Course Coverage Selection Box -->
@@ -424,19 +426,19 @@
                             </div>
                         </div>
 
-                        <div class="review-actions">
+                        <p style="margin-bottom: 16px; color: var(--text-muted);">
+                            Please verify the extracted instructor data before generating the schedule.
+                        </p>
+                        <div id="preview-list"
+                            style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; padding-right: 8px;">
+                            <!-- Preview items will be injected here -->
+                        </div>
+                        <div style="display: flex; gap: 12px;">
                             <button class="btn btn-ghost" onclick="downloadSample()"
-                                style="justify-content: center;">
+                                style="flex: 1; justify-content: center;">
                                 <i data-lucide="download"></i>
                                 Save This Data
                             </button>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span class="review-step-label">Step 4 of 4</span>
-                                <button class="btn btn-primary" id="make-schedule-btn">
-                                    <i data-lucide="calendar"></i>
-                                    Generate Schedule
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -515,9 +517,7 @@
         </main>
     </div>
 
-    <script src="scheduler-constraints.js"></script>
     <script src="app.js"></script>
-    <script src="scheduler-ui.js"></script>
     <script>
         // UI Handler integration for app.js
         let optimizationBannerShown = false;
@@ -1002,21 +1002,6 @@
             const landingNav = document.getElementById('nav-landing-actions');
             const scheduleNav = document.getElementById('nav-schedule-actions');
 
-            if (stage === 'preview') {
-                const setup = document.getElementById('schedule-setup');
-                const scheduleConfig = document.getElementById('schedule-config');
-                const priorities = document.getElementById('optimization-priorities');
-                const courseCoverage = document.getElementById('course-coverage-panel');
-                if (setup) {
-                    [scheduleConfig, priorities, courseCoverage].forEach(control => {
-                        if (control) {
-                            control.classList.remove('setup-controls-hidden');
-                            setup.appendChild(control);
-                        }
-                    });
-                }
-            }
-
             if (landing) landing.style.display = 'none';
             if (upload) upload.style.display = 'none';
             if (single) single.style.display = 'none';
@@ -1068,22 +1053,6 @@
         }
 
         function showSingleUpload() {
-            const title = document.getElementById('single-upload-title');
-            const action = document.getElementById('single-upload-action');
-            const description = document.getElementById('single-upload-description');
-            if (title) title.textContent = 'Upload a roster CSV';
-            if (action) action.textContent = 'Click or drag to upload your consolidated CSV';
-            if (description) description.textContent = 'Include instructors, courses, required hours, preferences, and unavailability.';
-            setAppStage('single-upload');
-        }
-
-        function showSessionUpload() {
-            const title = document.getElementById('single-upload-title');
-            const action = document.getElementById('single-upload-action');
-            const description = document.getElementById('single-upload-description');
-            if (title) title.textContent = 'Load a saved session';
-            if (action) action.textContent = 'Click or drag to upload your saved schedule (.json)';
-            if (description) description.textContent = 'Resume a prior schedule with its roster, setup choices, and manual edits.';
             setAppStage('single-upload');
         }
 
@@ -1146,23 +1115,11 @@
             singleFileInput.onchange = (e) => {
                 handleSingleFileInput(e.target.files[0]);
             };
-            // A repeated upload may use the same file; clear the old selection first
-            // so the browser emits a fresh change event.
-            singleFileInput.onclick = (e) => e.stopPropagation();
         }
 
         // Drag and drop for single file
         const singleDropzone = document.getElementById('single-dropzone');
         if (singleDropzone) {
-            singleDropzone.onclick = (e) => {
-                // The hidden input's synthetic click bubbles to this element.
-                // Ignore that event to avoid reopening the picker recursively.
-                if (e.target === singleFileInput) return;
-                if (singleFileInput) {
-                    singleFileInput.value = '';
-                    singleFileInput.click();
-                }
-            };
             singleDropzone.ondragover = (e) => { e.preventDefault(); singleDropzone.classList.add('dragover'); };
             singleDropzone.ondragleave = () => singleDropzone.classList.remove('dragover');
             singleDropzone.ondrop = (e) => {
@@ -1594,8 +1551,8 @@
 
                 return `
                 <div class="staff-card" draggable="true" ondragstart="handleDragStart(event)"
-            onmouseenter="highlightStaff('${inst.id}')" onmouseleave="clearHighlights()"
-            data-id="${inst.id}" data-name="${inst.name}" data-course="${inst.course}" data-mrr="${inst.isMRR}">
+            onmouseenter="highlightStaff('${inst.name}')" onmouseleave="clearHighlights()"
+            data-name="${inst.name}" data-course="${inst.course}" data-mrr="${inst.isMRR}">
                     <div class="flex-between">
                         <span class="course-badge">${inst.course}</span>
                         <span style="font-size: 10px; opacity: 0.7;">${assigned}/${required}h</span>
@@ -1625,10 +1582,6 @@
                         const isFullView = document.body.classList.contains('full-view-mode');
 
                         const cellHtml = entries.map(s => {
-                            const inferredInstructor = s.instructorId
-                                ? window.scheduler.findInstructor(s.instructorId)
-                                : state.instructors.find(instructor => instructor.name === s.name);
-                            const instructorId = s.instructorId || inferredInstructor?.id || '';
                             let displayName = s.name;
                             if (isFullView) {
                                 // Abbreviate: "Doe, John" -> "Doe, J."
@@ -1648,17 +1601,13 @@
 
                             return `
                                 <div class="staff-card ${isActive ? 'active-placement' : ''}" draggable="true" ondragstart="handleDragStart(event)"
-                                     onclick="scrollToRosterStaff(this.dataset.id)"
-                                     onmouseenter="highlightStaff('${instructorId}')" onmouseleave="clearHighlights()"
-                                     data-id="${instructorId}" data-slot="${slotId}" data-name="${s.name}" data-course="${s.course}" data-mrr="${s.isMRR}">
+                                     onclick="scrollToRosterStaff(this.dataset.name)"
+                                     onmouseenter="highlightStaff('${s.name}')" onmouseleave="clearHighlights()"
+                                     data-name="${s.name}" data-course="${s.course}" data-mrr="${s.isMRR}">
                                     <div class="staff-card-header">
                                         <span class="course-badge">${s.course}</span>
                                         <span class="staff-name">${displayName}</span>
                                     </div>
-                                    <button class="unassign-button" type="button" title="Remove ${s.name} from ${slotId}" aria-label="Remove ${s.name} from ${slotId}"
-                                        onclick="unassignStaffFromSlot(this.parentElement.dataset.id, this.parentElement.dataset.slot, event)">
-                                        <i data-lucide="x"></i>
-                                    </button>
                                 </div>
                             `;
                         }).join('');
@@ -1672,7 +1621,6 @@
             });
 
             renderScheduleSummary(state);
-            window.ShiftHappensUI.renderFeasibilityReport(state);
             updateMRRClaims();
             refreshGaps(state);
             refreshHoursWarnings(state);
@@ -1718,13 +1666,6 @@
             window.scheduler.undo();
         }
 
-        function unassignStaffFromSlot(instructorId, slotId, event) {
-            if (event) event.stopPropagation();
-            if (!window.scheduler.removeStaffFromSlot(instructorId, slotId)) {
-                alert('This assignment could not be removed. Please reload the session and try again.');
-            }
-        }
-
         // --- Drag & Drop ---
         let draggingItem = null;
         function handleDragStart(e) {
@@ -1732,8 +1673,8 @@
             e.target.classList.add('dragging');
 
             // Highlight unavailability
-            const instructorId = e.target.dataset.id;
-            const staff = window.scheduler.findInstructor(instructorId);
+            const name = e.target.dataset.name;
+            const staff = window.scheduler.state.instructors.find(i => i.name === name);
             if (staff) {
                 staff.unavail.forEach(id => {
                     const cell = document.getElementById(id);
@@ -1752,9 +1693,8 @@
             const targetStaffCard = e.target.closest('.staff-card');
 
             if (cell && draggingItem) {
-                const instructorId = draggingItem.dataset.id;
-                const staff = window.scheduler.findInstructor(instructorId);
-                const name = staff?.name || draggingItem.dataset.name;
+                const name = draggingItem.dataset.name;
+                const staff = window.scheduler.state.instructors.find(i => i.name === name);
                 const oldId = draggingItem.parentElement.id;
                 const newId = cell.id;
 
@@ -1765,9 +1705,8 @@
 
                 // Swap Logic
                 if (targetStaffCard && targetStaffCard !== draggingItem) {
-                    const targetId = targetStaffCard.dataset.id;
-                    const targetStaff = window.scheduler.findInstructor(targetId);
-                    const targetName = targetStaff?.name || targetStaffCard.dataset.name;
+                    const targetName = targetStaffCard.dataset.name;
+                    const targetStaff = window.scheduler.state.instructors.find(i => i.name === targetName);
 
                     if (targetStaff) {
                         // Check if either person is unavailable in their proposed new slots
@@ -1784,7 +1723,7 @@
                             }
                         }
 
-                        window.scheduler.swapStaff(instructorId, oldId, targetId, newId);
+                        window.scheduler.swapStaff(name, oldId, targetName, newId);
                         cleanupDrag();
                         return;
                     }
@@ -1804,7 +1743,7 @@
                 }
 
                 // Update state via the scheduler engine
-                window.scheduler.moveStaff(instructorId, oldId, newId);
+                window.scheduler.moveStaff(name, oldId, newId);
             }
             cleanupDrag();
         }
@@ -1825,7 +1764,7 @@
                 window.scheduler.state.instructors
                     .filter(i => i.assignments && i.assignments.length > 0)
                     .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(i => `<option value="${i.id}">${i.name}</option>`)
+                    .map(i => `<option value="${i.name}">${i.name}</option>`)
                     .join('');
 
             staffSelectA.innerHTML = optionsHtml;
@@ -1846,15 +1785,15 @@
         }
 
         function populateSwapSlots(which) {
-            const instructorId = document.getElementById(`swap-staff-${which}`).value;
+            const name = document.getElementById(`swap-staff-${which}`).value;
             const slotSelect = document.getElementById(`swap-slot-${which}`);
 
-            if (!instructorId) {
+            if (!name) {
                 slotSelect.innerHTML = '<option value="">Select assignment to swap...</option>';
                 return;
             }
 
-            const staff = window.scheduler.findInstructor(instructorId);
+            const staff = window.scheduler.state.instructors.find(i => i.name === name);
             if (!staff || !staff.assignments.length) {
                 slotSelect.innerHTML = '<option value="">No assignments</option>';
                 return;
@@ -1867,33 +1806,33 @@
         }
 
         function executeManualSwap() {
-            const instructorIdA = document.getElementById('swap-staff-a').value;
+            const nameA = document.getElementById('swap-staff-a').value;
             const slotA = document.getElementById('swap-slot-a').value;
-            const instructorIdB = document.getElementById('swap-staff-b').value;
+            const nameB = document.getElementById('swap-staff-b').value;
             const slotB = document.getElementById('swap-slot-b').value;
 
-            if (!instructorIdA || !slotA || !instructorIdB || !slotB) {
+            if (!nameA || !slotA || !nameB || !slotB) {
                 alert("Please select Staff and Assignments for both A and B.");
                 return;
             }
 
-            if (instructorIdA === instructorIdB) {
+            if (nameA === nameB) {
                 alert("Cannot swap a staff member with themselves.");
                 return;
             }
 
-            const staffA = window.scheduler.findInstructor(instructorIdA);
-            const staffB = window.scheduler.findInstructor(instructorIdB);
+            const staffA = window.scheduler.state.instructors.find(i => i.name === nameA);
+            const staffB = window.scheduler.state.instructors.find(i => i.name === nameB);
 
             // Constraint checks
             if (staffA.unavail.includes(slotB)) {
-                if (!confirm(`${staffA.name} is unavailable at ${slotB}. Proceed?`)) return;
+                if (!confirm(`${nameA} is unavailable at ${slotB}. Proceed?`)) return;
             }
             if (staffB.unavail.includes(slotA)) {
-                if (!confirm(`${staffB.name} is unavailable at ${slotA}. Proceed?`)) return;
+                if (!confirm(`${nameB} is unavailable at ${slotA}. Proceed?`)) return;
             }
 
-            window.scheduler.swapStaff(instructorIdA, slotA, instructorIdB, slotB);
+            window.scheduler.swapStaff(nameA, slotA, nameB, slotB);
             closeSwapModal();
         }
 
@@ -1908,13 +1847,13 @@
             document.querySelectorAll('.assignment-highlight').forEach(el => el.classList.remove('assignment-highlight'));
         }
 
-        function highlightStaff(instructorId) {
+        function highlightStaff(name) {
             clearHighlights();
-            const staff = window.scheduler.findInstructor(instructorId);
+            const staff = window.scheduler.state.instructors.find(i => i.name === name);
             if (!staff) return;
 
             // Highlight all instances of this staff member in the grid (Assignments)
-            document.querySelectorAll(`.staff-card[data-id="${instructorId}"]`).forEach(card => {
+            document.querySelectorAll(`.staff-card[data-name="${name}"]`).forEach(card => {
                 card.classList.add('assignment-highlight');
             });
 
@@ -1925,8 +1864,8 @@
             });
         }
 
-        function scrollToRosterStaff(instructorId) {
-            if (!instructorId) return;
+        function scrollToRosterStaff(name) {
+            if (!name) return;
             if (document.body.classList.contains('sidebar-hidden')) {
                 document.body.classList.remove('sidebar-hidden');
                 if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1935,10 +1874,10 @@
             if (!roster) return;
 
             const cards = Array.from(roster.querySelectorAll('.staff-card'));
-            const targetCard = cards.find(card => card.dataset.id === instructorId);
+            const targetCard = cards.find(card => card.dataset.name === name);
             if (targetCard) {
                 targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                highlightStaff(instructorId);
+                highlightStaff(name);
             }
         }
 
@@ -2329,13 +2268,7 @@ body {
 }
 .staff-name {
     font-weight: 700;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-    overflow-wrap: anywhere;
-    line-height: 1.25;
 }
-.unassign-button { display: none !important; }
 .flex-between {
     display: flex;
     justify-content: space-between;
@@ -2386,11 +2319,10 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
 .full-view-mode .staff-name {
     font-size: 9px;
     font-weight: 700;
-    line-height: 1.15;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-    overflow-wrap: anywhere;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .full-view-mode .staff-card strong { display: none; }
 .full-view-mode .staff-card div:not(.staff-card-header) { display: none !important; }
@@ -2553,12 +2485,23 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
 }
 `;
 
-            // The interactive editor includes remove controls. An exported schedule is
-            // read-only, so remove editor-only UI and retain full staff names.
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = gridHTML;
-            tempDiv.querySelectorAll('.unassign-button').forEach(button => button.remove());
-            const finalGridHTML = tempDiv.innerHTML;
+            // In Full View export, we need to abbreviate the names in the HTML we already got
+            let finalGridHTML = gridHTML;
+            if (exportFull) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = gridHTML;
+                tempDiv.querySelectorAll('.staff-name').forEach(el => {
+                    const name = el.innerText;
+                    const parts = name.split(',');
+                    if (parts.length > 1) {
+                        const last = parts[0].trim();
+                        const firstParts = parts[1].trim().split(/\s+/);
+                        const initials = firstParts.map(p => p[0].toUpperCase() + '.').join(' ');
+                        el.innerText = `${last}, ${initials}`;
+                    }
+                });
+                finalGridHTML = tempDiv.innerHTML;
+            }
 
             const content = `<!DOCTYPE html>
 <html lang="en" data-theme="${theme}">
@@ -2572,6 +2515,16 @@ body.full-view-mode { padding: 8px; height: 100vh; overflow: hidden; }
     <style>${inlinedCSS}</style>
 </head>
 <body class="${exportFull ? 'full-view-mode' : ''}">
+    <div class="no-print" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.1rem; font-weight: 700;">Shift Happens Schedule</h2>
+        <button onclick="window.print()" style="padding: 6px 14px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+            Print Schedule (Letter Paper)
+        </button>
+    </div>
+    <div class="print-header print-only">
+        <h1>Shift Happens Schedule</h1>
+        <span class="print-meta">Exported on ${new Date().toLocaleDateString()}</span>
+    </div>
     <div class="schedule-grid" id="main-grid">
         ${finalGridHTML}
     </div>

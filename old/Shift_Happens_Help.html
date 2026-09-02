@@ -259,29 +259,29 @@
             <p class="subtitle">Complete user guide for dynamic scheduling, course coverage enforcement, live roster editing, and letter-sized printing.</p>
         </header>
 
-        <!-- Section 1: Ways to Begin -->
+        <!-- Section 1: 4 Ways to Begin -->
         <div class="section">
-            <h2><i data-lucide="layers"></i> 1. Start a Session</h2>
-            <p style="margin-bottom: 20px; color: var(--text-muted);">The start screen focuses only on choosing a source. Operating hours, priorities, and required-course choices come after the roster is loaded.</p>
+            <h2><i data-lucide="layers"></i> 1. Four Ways to Begin a Session</h2>
+            <p style="margin-bottom: 20px; color: var(--text-muted);">Choose the entry method that best fits your departmental workflow:</p>
             <div class="grid-4">
                 <div class="card">
                     <i data-lucide="files" style="width: 28px; height: 28px;"></i>
-                    <strong>Use Three Source Files</strong>
+                    <strong>1. Upload 3 CSVs</strong>
                     <p>Standard departmental ingestion using <code>people.csv</code> (unavailability & preferences), <code>teaching.csv</code> (course sections), and <code>mrr.csv</code> (MRR staff).</p>
                 </div>
                 <div class="card">
                     <i data-lucide="file-spreadsheet" style="width: 28px; height: 28px; color: var(--success);"></i>
-                    <strong>Upload a Roster</strong>
-                    <p>Upload a consolidated <code>mrr_scheduler_input.csv</code> containing all instructors, hours, preferences, and unavailability. Select <strong>Try sample schedule</strong> for a small, math-themed practice roster.</p>
+                    <strong>2. Single File CSV</strong>
+                    <p>Upload a consolidated <code>mrr_scheduler_input.csv</code> containing all instructors, hours, preferences, and unavailability. A sample format can be downloaded with one click.</p>
                 </div>
                 <div class="card">
                     <i data-lucide="sparkles" style="width: 28px; height: 28px; color: var(--accent);"></i>
-                    <strong>Build Manually</strong>
+                    <strong>3. Start from Scratch</strong>
                     <p>Start with a clean slate and build your roster, courses, and time constraints manually in the interactive web interface.</p>
                 </div>
                 <div class="card">
                     <i data-lucide="folder-open" style="width: 28px; height: 28px; color: #8b5cf6;"></i>
-                    <strong>Load a Saved Session</strong>
+                    <strong>4. Load Session (.json)</strong>
                     <p>Instantly restore a previously saved <code>.json</code> session file to pick up right where you left off with all assignments and configurations preserved.</p>
                 </div>
             </div>
@@ -290,7 +290,7 @@
         <!-- Section 2: Time Slot & Schedule Configuration -->
         <div class="section">
             <h2><i data-lucide="clock"></i> 2. Time Slot & Schedule Customization</h2>
-            <p style="margin-bottom: 16px; color: var(--text-muted);">Step 3 follows roster review. Set operating hours and scheduling priorities before generating the schedule:</p>
+            <p style="margin-bottom: 16px; color: var(--text-muted);">Configure your weekly operating hours before generating the schedule:</p>
             <div class="grid-2">
                 <div class="card">
                     <i data-lucide="calendar"></i>
@@ -312,18 +312,13 @@
                     <strong>Default Reset</strong>
                     <p>Easily revert to standard departmental weekday hours (Mon–Thu 09:30–16:30, Fri 09:30–12:30) anytime.</p>
                 </div>
-                <div class="card">
-                    <i data-lucide="sliders-horizontal"></i>
-                    <strong>Scheduling Priorities</strong>
-                    <p>Choose a strategy such as Balanced, Staff Preference Focus, Even Room Load, or Subject Coverage Focus. You can also fine-tune back-to-back preferences, room balance, course variety, and core coverage independently.</p>
-                </div>
             </div>
         </div>
 
         <!-- Section 3: Data Preview & Live Editing -->
         <div class="section">
             <h2><i data-lucide="user-check"></i> 3. Data Preview & In-Browser Editor</h2>
-            <p style="margin-bottom: 16px; color: var(--text-muted);">Step 2 is a roster review. Step 3 combines operating hours, scheduling priorities, and required course coverage before you generate the schedule:</p>
+            <p style="margin-bottom: 16px; color: var(--text-muted);">Before generating the schedule, verify and fine-tune your staff constraints in the Preview stage:</p>
             <div class="step-list">
                 <div class="step-item">
                     <div class="step-num">A</div>
@@ -359,7 +354,7 @@
         <!-- Section 4: Course Coverage & MRR Automation -->
         <div class="section">
             <h2><i data-lucide="shield-check"></i> 4. Course Coverage & MRR Engine</h2>
-            <p style="margin-bottom: 16px; color: var(--text-muted);">Choose which courses should be covered in every active time slot. The scheduler uses primary instructors and MRR staff where capacity permits, then reports any remaining gaps:</p>
+            <p style="margin-bottom: 16px; color: var(--text-muted);">Shift Happens guarantees that all essential courses are manned in every active time slot:</p>
             <div class="grid-2">
                 <div class="card">
                     <i data-lucide="check-circle-2"></i>
@@ -379,7 +374,7 @@
                 <div class="card">
                     <i data-lucide="alert-triangle" style="color: var(--danger);"></i>
                     <strong>Coverage Gap Alerts</strong>
-                    <p>If a slot has uncovered courses or insufficient MRR capacity, a prominent warning details exactly which slot and courses are missing.</p>
+                    <p>If a slot has uncovered courses and insufficient MRR staff, a prominent red warning details exactly which slot and courses are missing.</p>
                 </div>
             </div>
         </div>
@@ -391,17 +386,12 @@
                 <div class="card">
                     <i data-lucide="mouse-pointer-2"></i>
                     <strong>Live Drag & Drop</strong>
-                    <p>Drag any staff card into a different slot. To remove an assignment without immediately replacing it, hover over its calendar card and select the <strong>×</strong> control. Schedule scores, hours, and gap alerts update instantly, and Undo restores the removal.</p>
+                    <p>Drag any staff card into a different slot. Schedule scores, hours, and gap alerts update instantly.</p>
                 </div>
                 <div class="card">
                     <i data-lucide="arrow-left-right"></i>
                     <strong>Instant & Modal Swapping</strong>
-                    <p>Drag one card on top of another to swap, or open the <strong>Swap Staff</strong> modal to trade assignments across distant slots. If a negotiated exception is needed, confirm the availability warning to make a manual override.</p>
-                </div>
-                <div class="card">
-                    <i data-lucide="search-check"></i>
-                    <strong>Constraint Explanations</strong>
-                    <p>Before scheduling, Shift Happens identifies impossible hour requests and required courses with no eligible primary or MRR coverage. These are shown as clear schedule alerts rather than hidden failures.</p>
+                    <p>Drag one card on top of another to swap, or open the <strong>Swap Staff</strong> modal to trade assignments across distant slots.</p>
                 </div>
                 <div class="card">
                     <i data-lucide="flame"></i>
@@ -462,12 +452,12 @@
                 <div class="card">
                     <i data-lucide="save"></i>
                     <strong>Save Session (.json)</strong>
-                    <p>Export your full schedule, roster, custom courses, and constraints as a <code>.json</code> file to archive or resume editing later. Instructor IDs are saved so people with the same display name remain distinct.</p>
+                    <p>Export your full schedule, roster, custom courses, and constraints as a <code>.json</code> file to archive or resume editing later.</p>
                 </div>
                 <div class="card">
                     <i data-lucide="download"></i>
                     <strong>Export Standalone HTML</strong>
-                    <p>Generate a self-contained, read-only HTML calendar with embedded styling, full staff names, and light/dark themes that can be opened on any device. It contains only the schedule—editing and print controls are left out of the exported copy.</p>
+                    <p>Generate a self-contained, interactive HTML file with embedded styling, light/dark themes, and built-in print buttons that can be opened on any device.</p>
                 </div>
                 <div class="card">
                     <i data-lucide="sun"></i>

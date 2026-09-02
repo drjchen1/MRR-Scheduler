@@ -6,9 +6,7 @@ const vm = require('node:vm');
 
 function createScheduler() {
   const appJsPath = path.join(__dirname, '..', 'app.js');
-  const constraintPath = path.join(__dirname, '..', 'scheduler-constraints.js');
   const source = fs.readFileSync(appJsPath, 'utf8');
-  const constraintSource = fs.readFileSync(constraintPath, 'utf8');
 
   const context = {
     console,
@@ -25,7 +23,6 @@ function createScheduler() {
   };
 
   vm.createContext(context);
-  vm.runInContext(constraintSource, context, { filename: constraintPath });
   vm.runInContext(source, context, { filename: appJsPath });
   return context.window.scheduler;
 }
@@ -88,44 +85,6 @@ test('runScheduler smoke: no duplicate assignments and no blocked-slot assignmen
       assert.equal(inst.unavail.includes(slot), false, `${inst.name} assigned into blocked slot ${slot}`);
     });
   });
-});
-
-test('stable instructor IDs keep duplicate names distinct during a manual move', () => {
-  const scheduler = createScheduler();
-  scheduler.setScheduleConfig(['Mon'], [], { Mon: ['09:30', '10:30'] });
-  scheduler.state.instructors = [
-    { id: 'inst-a', name: 'Lee, Alex', course: 'MA 16100', required: 1, assigned: 1, assignments: ['Mon 09:30'], unavail: [], isMRR: false },
-    { id: 'inst-b', name: 'Lee, Alex', course: 'MA 16200', required: 1, assigned: 1, assignments: ['Mon 10:30'], unavail: [], isMRR: false }
-  ];
-  scheduler.state.schedule = {
-    Mon: {
-      '09:30': [{ instructorId: 'inst-a', name: 'Lee, Alex', course: 'MA 16100', isMRR: false }],
-      '10:30': [{ instructorId: 'inst-b', name: 'Lee, Alex', course: 'MA 16200', isMRR: false }]
-    }
-  };
-
-  scheduler.moveStaff('inst-a', 'Mon 09:30', 'Mon 10:30');
-
-  assert.equal(scheduler.state.schedule.Mon['09:30'].length, 0);
-  assert.deepEqual(
-    scheduler.state.schedule.Mon['10:30'].map(entry => entry.instructorId).sort(),
-    ['inst-a', 'inst-b']
-  );
-});
-
-test('feasibility report explains impossible staffing and core coverage before scheduling', () => {
-  const scheduler = createScheduler();
-  scheduler.setScheduleConfig(['Mon'], [], { Mon: ['09:30'] });
-  scheduler.state.instructors = [{
-    id: 'inst-a', name: 'Parker, Pat', course: 'MA 16100', required: 2,
-    assigned: 0, assignments: [], unavail: ['Mon 09:30'], isMRR: false
-  }];
-  scheduler.setRequiredCourses(['MA 16200']);
-
-  const report = scheduler.getFeasibilityReport();
-  assert.equal(report.feasible, false);
-  assert.equal(report.issues.some(issue => issue.type === 'insufficient-availability'), true);
-  assert.equal(report.issues.some(issue => issue.type === 'unserviceable-core-course'), true);
 });
 
 test('setScheduleConfig/getAllSlots: custom day-slot shape is preserved', () => {
@@ -231,52 +190,6 @@ test('moveStaff and swapStaff keep instructor assignments and schedule cells in 
     scheduler.state.schedule.Mon['10:30'].some((s) => s.name === 'Alpha, Ann'),
     true
   );
-});
-
-test('removeStaffFromSlot removes a calendar assignment and Undo restores it', () => {
-  const scheduler = createScheduler();
-  scheduler.setScheduleConfig(['Mon'], [], { Mon: ['09:30'] });
-  scheduler.state.instructors = [{
-    id: 'inst-remove', name: 'Remove, Riley', course: 'MA 16100', sections: 1,
-    unavail: [], isMRR: false, required: 1, pref: 'No preference',
-    assignments: [slotId('Mon', '09:30')], assigned: 1
-  }];
-  scheduler.state.schedule = {
-    Mon: {
-      '09:30': [{ instructorId: 'inst-remove', name: 'Remove, Riley', course: 'MA 16100', isMRR: false }]
-    }
-  };
-  scheduler.saveHistory();
-
-  assert.equal(scheduler.removeStaffFromSlot('inst-remove', slotId('Mon', '09:30')), true);
-  assert.deepEqual([...scheduler.state.instructors[0].assignments], []);
-  assert.equal(scheduler.state.instructors[0].assigned, 0);
-  assert.equal(scheduler.state.schedule.Mon['09:30'].length, 0);
-
-  scheduler.undo();
-  assert.deepEqual([...scheduler.state.instructors[0].assignments], [slotId('Mon', '09:30')]);
-  assert.equal(scheduler.state.schedule.Mon['09:30'][0].instructorId, 'inst-remove');
-});
-
-test('importSessionJSON upgrades unambiguous legacy schedule entries with instructor IDs', () => {
-  const scheduler = createScheduler();
-  const legacySession = {
-    instructors: [{
-      name: 'Legacy, Lee', course: 'MA 16100', required: 1, assigned: 1,
-      assignments: ['Mon 09:30'], unavail: [], isMRR: false
-    }],
-    schedule: {
-      Mon: {
-        '09:30': [{ name: 'Legacy, Lee', course: 'MA 16100', isMRR: false }]
-      }
-    }
-  };
-
-  assert.equal(scheduler.importSessionJSON(legacySession), true);
-  const instructorId = scheduler.state.instructors[0].id;
-  assert.equal(scheduler.state.schedule.Mon['09:30'][0].instructorId, instructorId);
-  assert.equal(scheduler.removeStaffFromSlot(instructorId, 'Mon 09:30'), true);
-  assert.equal(scheduler.state.schedule.Mon['09:30'].length, 0);
 });
 
 test('processSingleFile parses required fields and normalizes preferences', async () => {
@@ -550,8 +463,6 @@ test('style.css and index.html contain letter-sized landscape print stylesheet w
   assert.match(indexSource, /class="[^"]*print-header[^"]*"/, 'index.html missing print-header element');
   assert.match(indexSource, /function\s+printSchedule\s*\(/, 'index.html missing printSchedule function definition');
   assert.match(indexSource, /letter\s+landscape/, 'index.html exportHTML missing letter landscape page size');
-  assert.match(indexSource, /querySelectorAll\('\.unassign-button'\).*button\.remove/s, 'export should remove calendar edit controls');
-  assert.match(indexSource, /\.unassign-button \{ display: none !important; \}/, 'export stylesheet should defensively hide calendar edit controls');
 });
 
 test('setOptimizationPreset applies correct levels for each built-in preset', () => {
@@ -660,3 +571,4 @@ test('index.html contains optimization priority UI elements and JS functions', (
   assert.match(source, /id="opt-preset-balanced"/, 'missing Balanced preset button');
   assert.match(source, /id="preview-priorities-summary"/, 'missing preview stage priorities summary');
 });
+

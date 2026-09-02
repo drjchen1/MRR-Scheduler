@@ -74,7 +74,6 @@ class ShiftHappensScheduler {
             instructors: [], // Combined list of MRR && Primary instructors
             schedule: {},    // { day: { time: [staff] } }
             history: [],
-            nextInstructorId: 1,
             config: {
                 halfHourCourses: ['MA 15800', 'MA 16010', 'MA 16020'],
                 potentialCore: ['MA 15300', 'MA 15800', 'MA 16010', 'MA 16020', 'MA 16100', 'MA 16200', 'MA 26100', 'MA 16500', 'MA 16600'],
@@ -178,72 +177,7 @@ class ShiftHappensScheduler {
         };
     }
 
-    getFeasibilityReport() {
-        if (!window.ShiftHappensConstraints) {
-            return { feasible: true, issues: [], totalSlots: 0, availableByInstructor: new Map() };
-        }
-        return window.ShiftHappensConstraints.analyze(
-            this.state,
-            day => this.getSlotsForDay(day),
-            course => this.normalizeCourse(course)
-        );
-    }
-
     // --- Helpers ---
-    ensureInstructorIds() {
-        const used = new Set();
-        let next = Number(this.state.nextInstructorId) || 1;
-        (this.state.instructors || []).forEach(inst => {
-            if (inst.id && !used.has(inst.id)) {
-                used.add(inst.id);
-                return;
-            }
-            while (used.has(`inst-${next}`)) next++;
-            inst.id = `inst-${next++}`;
-            used.add(inst.id);
-        });
-        this.state.nextInstructorId = next;
-    }
-
-    findInstructor(identifier) {
-        return (this.state.instructors || []).find(inst => inst.id === identifier) ||
-            (this.state.instructors || []).find(inst => inst.name === identifier);
-    }
-
-    entryMatchesInstructor(entry, instructor) {
-        return entry.instructorId ? entry.instructorId === instructor.id : entry.name === instructor.name;
-    }
-
-    makeScheduleEntry(instructor) {
-        return {
-            instructorId: instructor.id,
-            name: instructor.name,
-            course: instructor.course,
-            isMRR: instructor.isMRR
-        };
-    }
-
-    hydrateLegacyScheduleEntries() {
-        const instructorsByName = new Map();
-        (this.state.instructors || []).forEach(instructor => {
-            const matches = instructorsByName.get(instructor.name) || [];
-            matches.push(instructor);
-            instructorsByName.set(instructor.name, matches);
-        });
-
-        Object.values(this.state.schedule || {}).forEach(day => {
-            Object.values(day || {}).forEach(entries => {
-                (entries || []).forEach(entry => {
-                    if (entry.instructorId) return;
-                    const matches = instructorsByName.get(entry.name) || [];
-                    // Legacy sessions identify entries by name. Upgrade only when
-                    // that name is unambiguous; duplicate legacy names remain safe.
-                    if (matches.length === 1) entry.instructorId = matches[0].id;
-                });
-            });
-        });
-    }
-
     getRowValue(row, candidates) {
         if (!row || Array.isArray(row)) return "";
         const keys = Object.keys(row);
@@ -538,7 +472,7 @@ class ShiftHappensScheduler {
         if (!this.state.schedule[d] || !this.state.schedule[d][t]) return false;
         if (person.assignments.includes(slotId)) return false;
         if (person.unavail.includes(slotId)) return false;
-        this.state.schedule[d][t].push(this.makeScheduleEntry(person));
+        this.state.schedule[d][t].push({ name: person.name, course: person.course, isMRR: person.isMRR });
         person.assignments.push(slotId);
         person.assigned = person.assignments.length;
         return true;
@@ -547,7 +481,7 @@ class ShiftHappensScheduler {
     unassignFromSlot(person, slotId) {
         const [d, t] = slotId.split(' ');
         if (!this.state.schedule[d] || !this.state.schedule[d][t]) return false;
-        this.state.schedule[d][t] = this.state.schedule[d][t].filter(s => !this.entryMatchesInstructor(s, person));
+        this.state.schedule[d][t] = this.state.schedule[d][t].filter(s => s.name !== person.name);
         person.assignments = person.assignments.filter(a => a !== slotId);
         person.assigned = person.assignments.length;
         return true;
@@ -618,7 +552,7 @@ class ShiftHappensScheduler {
                 if (possible.length) {
                     possible.sort((a, b) => a.score - b.score);
                     const best = possible[0];
-                    schedule[best.d][best.t].push(this.makeScheduleEntry(person));
+                    schedule[best.d][best.t].push({ name: person.name, course: person.course, isMRR: person.isMRR });
                     person.assignments.push(`${best.d} ${best.t}`);
                     person.assigned = person.assignments.length;
                     progress = true;
@@ -816,7 +750,6 @@ class ShiftHappensScheduler {
 
         this.state.history = []; // Clear history on new generation
         this.state.instructors = finalInstructors;
-        this.ensureInstructorIds();
         this.computeCoreCourses();
 
         // Notify UI that data is ready for preview
@@ -918,7 +851,6 @@ class ShiftHappensScheduler {
             });
         });
 
-        this.ensureInstructorIds();
         // Initialize assignment tracking on the actual state objects
         this.state.instructors.forEach(inst => {
             inst.assigned = 0;
@@ -927,17 +859,7 @@ class ShiftHappensScheduler {
 
         this.state.schedule = schedule;
         this.computeCoreCourses();
-        const feasibility = this.getFeasibilityReport();
-        this.state.feasibilityReport = {
-            ...feasibility,
-            availableByInstructor: undefined
-        };
-        // Assign the most constrained people first, then break ties by hours required.
-        const staffQueue = [...this.state.instructors].sort((a, b) => {
-            const aAvailable = (feasibility.availableByInstructor.get(a.id) || []).length;
-            const bAvailable = (feasibility.availableByInstructor.get(b.id) || []).length;
-            return aAvailable - bAvailable || b.required - a.required || a.name.localeCompare(b.name);
-        });
+        const staffQueue = [...this.state.instructors].sort((a, b) => b.required - a.required);
 
         const maxReq = Math.max(...staffQueue.map(s => s.required), 0);
         const weights = this.getComputedWeights();
@@ -999,7 +921,7 @@ class ShiftHappensScheduler {
                 if (possible.length > 0) {
                     possible.sort((a, b) => a.score - b.score);
                     const best = possible[0];
-                    schedule[best.d][best.t].push(this.makeScheduleEntry(person));
+                    schedule[best.d][best.t].push({ name: person.name, course: person.course, isMRR: person.isMRR });
                     person.assigned++;
                     person.assignments.push(`${best.d} ${best.t}`);
 
@@ -1037,7 +959,6 @@ class ShiftHappensScheduler {
         const snapshot = {
             schedule: JSON.parse(JSON.stringify(this.state.schedule)),
             instructors: this.state.instructors.map(i => ({
-                id: i.id,
                 name: i.name,
                 assigned: i.assigned,
                 assignments: [...i.assignments]
@@ -1060,7 +981,7 @@ class ShiftHappensScheduler {
 
         // Restore each instructor's assignment list
         prev.instructors.forEach(saved => {
-            const inst = this.findInstructor(saved.id || saved.name);
+            const inst = this.state.instructors.find(i => i.name === saved.name);
             if (inst) {
                 inst.assigned = saved.assigned;
                 inst.assignments = [...saved.assignments];
@@ -1072,10 +993,10 @@ class ShiftHappensScheduler {
         this.render();
     }
 
-    moveStaff(instructorId, oldSlotId, newSlotId) {
+    moveStaff(name, oldSlotId, newSlotId) {
         if (oldSlotId === newSlotId) return;
 
-        const instructor = this.findInstructor(instructorId);
+        const instructor = this.state.instructors.find(i => i.name === name);
         if (!instructor) return;
 
         // Ensure IDs are clean
@@ -1093,7 +1014,7 @@ class ShiftHappensScheduler {
         if (cleanOldId) {
             const [oldD, oldT] = cleanOldId.split(' ');
             if (this.state.schedule[oldD]?.[oldT]) {
-                this.state.schedule[oldD][oldT] = this.state.schedule[oldD][oldT].filter(s => !this.entryMatchesInstructor(s, instructor));
+                this.state.schedule[oldD][oldT] = this.state.schedule[oldD][oldT].filter(s => s.name !== name);
                 instructor.assignments = instructor.assignments
                     .map(id => id.trim())
                     .filter(id => id !== cleanOldId);
@@ -1105,32 +1026,13 @@ class ShiftHappensScheduler {
         if (cleanNewId) {
             const [newD, newT] = cleanNewId.split(' ');
             if (this.state.schedule[newD]?.[newT]) {
-                this.state.schedule[newD][newT].push(this.makeScheduleEntry(instructor));
+                this.state.schedule[newD][newT].push({ name: instructor.name, course: instructor.course, isMRR: instructor.isMRR });
                 instructor.assignments.push(cleanNewId);
                 instructor.assigned = instructor.assignments.length;
             }
         }
 
         this.render();
-    }
-
-    removeStaffFromSlot(instructorId, slotId) {
-        const instructor = this.findInstructor(instructorId);
-        const cleanSlotId = slotId ? slotId.trim() : '';
-        if (!instructor || !cleanSlotId) return false;
-
-        const hasAssignment = (instructor.assignments || []).some(id => id.trim() === cleanSlotId);
-        if (!hasAssignment) return false;
-
-        const [day, time] = cleanSlotId.split(' ');
-        if (!this.state.schedule[day]?.[time]) return false;
-
-        this.saveHistory();
-        this.unassignFromSlot(instructor, cleanSlotId);
-        this.state.optimizationCount = 0;
-        this.state.activeAssignment = null;
-        this.render();
-        return true;
     }
 
     updateInstructor(index, field, value) {
@@ -1154,13 +1056,13 @@ class ShiftHappensScheduler {
         inst[field] = value;
     }
 
-    swapStaff(instructorIdA, oldSlotId, instructorIdB, newSlotId) {
+    swapStaff(nameA, oldSlotId, nameB, newSlotId) {
         // Validation checks
-        if (!instructorIdA || !instructorIdB || !oldSlotId || !newSlotId) return;
+        if (!nameA || !nameB || !oldSlotId || !newSlotId) return;
         if (oldSlotId === newSlotId) return; // Same slot
 
-        const instA = this.findInstructor(instructorIdA);
-        const instB = this.findInstructor(instructorIdB);
+        const instA = this.state.instructors.find(i => i.name === nameA);
+        const instB = this.state.instructors.find(i => i.name === nameB);
         if (!instA || !instB) return;
 
         const cleanOldId = oldSlotId.trim();
@@ -1172,25 +1074,25 @@ class ShiftHappensScheduler {
         // 2. Remove A from old slot && B from new slot
         const [oldD, oldT] = cleanOldId.split(' ');
         if (this.state.schedule[oldD]?.[oldT]) {
-            this.state.schedule[oldD][oldT] = this.state.schedule[oldD][oldT].filter(s => !this.entryMatchesInstructor(s, instA));
+            this.state.schedule[oldD][oldT] = this.state.schedule[oldD][oldT].filter(s => s.name !== nameA);
             instA.assignments = instA.assignments.filter(id => id.trim() !== cleanOldId);
         }
 
         const [newD, newT] = cleanNewId.split(' ');
         if (this.state.schedule[newD]?.[newT]) {
-            this.state.schedule[newD][newT] = this.state.schedule[newD][newT].filter(s => !this.entryMatchesInstructor(s, instB));
+            this.state.schedule[newD][newT] = this.state.schedule[newD][newT].filter(s => s.name !== nameB);
             instB.assignments = instB.assignments.filter(id => id.trim() !== cleanNewId);
         }
 
         // 3. Add A to new slot
         if (this.state.schedule[newD]?.[newT]) {
-            this.state.schedule[newD][newT].push(this.makeScheduleEntry(instA));
+            this.state.schedule[newD][newT].push({ name: instA.name, course: instA.course, isMRR: instA.isMRR });
             instA.assignments.push(cleanNewId);
         }
 
         // 4. Add B to old slot
         if (this.state.schedule[oldD]?.[oldT]) {
-            this.state.schedule[oldD][oldT].push(this.makeScheduleEntry(instB));
+            this.state.schedule[oldD][oldT].push({ name: instB.name, course: instB.course, isMRR: instB.isMRR });
             instB.assignments.push(cleanOldId);
         }
 
@@ -1219,7 +1121,6 @@ class ShiftHappensScheduler {
 
     addInstructor() {
         this.state.instructors.push({
-            id: null,
             name: "New Instructor",
             course: "MRR",
             sections: 1,
@@ -1229,7 +1130,6 @@ class ShiftHappensScheduler {
             pref: "No preference",
             assignments: []
         });
-        this.ensureInstructorIds();
         if (this.onPreview) this.onPreview(this.state);
     }
 
@@ -1261,7 +1161,6 @@ class ShiftHappensScheduler {
         });
 
         this.state.history = [];
-        this.ensureInstructorIds();
         this.computeCoreCourses();
         if (this.onPreview) this.onPreview(this.state);
     }
@@ -1347,15 +1246,11 @@ class ShiftHappensScheduler {
             this.state.instructors = [];
         }
 
-        this.ensureInstructorIds();
-
         if (data.schedule && typeof data.schedule === 'object') {
             this.state.schedule = JSON.parse(JSON.stringify(data.schedule));
         } else {
             this.state.schedule = {};
         }
-
-        this.hydrateLegacyScheduleEntries();
 
         this.state.history = [];
         this.computeCoreCourses();
@@ -1413,8 +1308,8 @@ class ShiftHappensScheduler {
                             instB.assignments[bIdx] = slotA;
 
                             // coverage guard: avoid creating gaps without MRR
-                            const slotAEntries = this.state.schedule[dA][tA].filter(s => !this.entryMatchesInstructor(s, instA)).concat([this.makeScheduleEntry(instB)]);
-                            const slotBEntries = this.state.schedule[dB][tB].filter(s => !this.entryMatchesInstructor(s, instB)).concat([this.makeScheduleEntry(instA)]);
+                            const slotAEntries = this.state.schedule[dA][tA].filter(s => s.name !== instA.name).concat([{ name: instB.name, course: instB.course, isMRR: instB.isMRR }]);
+                            const slotBEntries = this.state.schedule[dB][tB].filter(s => s.name !== instB.name).concat([{ name: instA.name, course: instA.course, isMRR: instA.isMRR }]);
                             const missingA = this.getMissingCoreForEntries(slotAEntries);
                             const missingB = this.getMissingCoreForEntries(slotBEntries);
                             const hasMRRA = slotAEntries.some(e => e.isMRR);
@@ -1425,11 +1320,11 @@ class ShiftHappensScheduler {
 
                             if (coverageOk && scoreSwapped < scoreCurrent) {
                                 // Keep swap - update state schedule array as well
-                                this.state.schedule[dA][tA] = this.state.schedule[dA][tA].filter(s => !this.entryMatchesInstructor(s, instA));
-                                this.state.schedule[dA][tA].push(this.makeScheduleEntry(instB));
+                                this.state.schedule[dA][tA] = this.state.schedule[dA][tA].filter(s => s.name !== instA.name);
+                                this.state.schedule[dA][tA].push({ name: instB.name, course: instB.course, isMRR: instB.isMRR });
 
-                                this.state.schedule[dB][tB] = this.state.schedule[dB][tB].filter(s => !this.entryMatchesInstructor(s, instB));
-                                this.state.schedule[dB][tB].push(this.makeScheduleEntry(instA));
+                                this.state.schedule[dB][tB] = this.state.schedule[dB][tB].filter(s => s.name !== instB.name);
+                                this.state.schedule[dB][tB].push({ name: instA.name, course: instA.course, isMRR: instA.isMRR });
 
                                 improved = true;
                                 totalSwaps++;

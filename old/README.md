@@ -1,6 +1,6 @@
 # 🗓️ Shift Happens
 
-**Shift Happens** is an intelligent, dynamic web-based staffing and scheduling dashboard designed for clinical and academic rosters. It transforms instructor availability, teaching sections, and coverage requirements into an optimized initial schedule with rich live-editing capabilities.
+**Shift Happens** is an intelligent, dynamic web-based staffing and scheduling dashboard designed for clinical and academic rosters. It automatically transforms raw instructor availability, teaching sections, and coverage requirements into an optimized, conflict-free schedule with rich live-editing capabilities.
 
 Built entirely with modern **HTML5**, **CSS3**, and **vanilla JavaScript (ES6+)**, Shift Happens runs **100% client-side** in your browser without requiring any backend server, database, or external setup.
 
@@ -14,11 +14,9 @@ Built entirely with modern **HTML5**, **CSS3**, and **vanilla JavaScript (ES6+)*
 - 🔁 **Back-to-Back (B2B) Optimization**: Honors individual instructor preferences (`Yes`, `No`, or `No preference`) to either group consecutive teaching hours or spread them out across the week.
 - 📊 **Real-Time Schedule Score**: Live composite dashboard metric evaluating **Coverage (40%)**, **Assignment Completeness (30%)**, **B2B Satisfaction (20%)**, and **Schedule Balance (10%)**.
 - ⚠️ **Intelligent Warnings & Gap Tracking**: Real-time alerts highlighting uncovered required courses, incomplete staff assignments, and over-assigned hours.
-- 🔎 **Feasibility Check**: Before assigning staff, the scheduler identifies impossible hour requests and required courses with no eligible primary or MRR coverage, then explains them in the schedule view.
-- 🪪 **Stable Instructor Identity**: Every instructor has a persistent internal ID, so duplicate display names can be scheduled, moved, swapped, saved, and restored independently.
 
 ### 🖱️ Interactive Live-Editing & Visual Tools
-- 🖐️ **Drag-and-Drop Slot Editing**: Move staff between slots or remove an assignment directly from a calendar card; schedule scores, gaps, hours, and Undo update immediately.
+- 🖐️ **Drag-and-Drop Slot Editing**: Move staff between slots on the fly with real-time recalculation of schedule score, gaps, and hours.
 - 🔄 **Direct & Modal Swapping**: Swap assignments by dragging one staff card directly onto another, or use the dedicated **Swap Staff** modal to trade assignments across distant days.
 - 👥 **Interactive Staff Roster**: Collapsible sidebar listing all instructors with live assignment progress, B2B satisfaction badges, hover tooltips for scheduled slots and conflicts, and cross-highlighting on hover.
 - 🔍 **Click-to-Locate**: Clicking any staff card in the schedule grid automatically scrolls to and highlights that instructor in the roster sidebar.
@@ -29,23 +27,21 @@ Built entirely with modern **HTML5**, **CSS3**, and **vanilla JavaScript (ES6+)*
 ### 🖨️ Printing, Saving & Exporting
 - 📄 **Printer-Friendly Letter Layout**: Dedicated print engine formatted for standard **US Letter paper (landscape, 8.5" × 11")**, fitting the complete schedule onto a single page (or minimal pages) while keeping all instructor names and course badges completely visible without truncation.
 - 💾 **Session Save & Restore (JSON)**: Save your active scheduling draft as a `.json` session file to resume editing anytime.
-- 📤 **Standalone HTML Export**: Export a self-contained, read-only `.html` calendar with embedded styling, full staff names, and light/dark themes. It contains only the schedule—no editing or print controls.
+- 📤 **Standalone HTML Export**: Export the interactive schedule as a self-contained `.html` file with embedded styling, light/dark themes, and built-in print controls.
 - 🌓 **Dark & Light Mode**: Seamless theme toggle with automatic system theme detection.
 
 ---
 
-## 🧭 Start Workflow
+## 📁 4 Data Ingestion Modes
 
-The start screen asks only how you want to begin. After the roster is loaded, the app guides you through review, configuration, and schedule generation.
+Shift Happens provides four flexible entry pathways:
 
-| Step | What happens |
+| Mode | Description |
 | :--- | :--- |
-| **1. Choose a source** | Upload a consolidated roster CSV, use the people/teaching/MRR three-file workflow, build a roster manually, or load a saved session. |
-| **2. Review the roster** | Check instructors, required hours, preferences, and unavailable slots. |
-| **3. Configure the schedule** | Set operating days and times, scheduling priorities, and the courses that require coverage. |
-| **4. Generate and refine** | Create the initial schedule, review feasibility and coverage alerts, then drag, swap, save, print, or export. |
-
-For a quick first run, choose **Try sample schedule** from the start screen. It downloads the included math-themed practice roster.
+| **1. Upload 3 CSVs** *(Standard)* | Standard departmental ingestion using `people.csv` (unavailability & preferences), `teaching.csv` (course section assignments), and `mrr.csv` (MRR pool staff & hours). |
+| **2. Single File Upload** | Upload a single consolidated CSV (`mrr_scheduler_input.csv`). Download a sample format directly from the landing page. |
+| **3. Start from Scratch** | Begin with a clean slate to manually build your roster, courses, required hours, preferences, and slot constraints in the browser. |
+| **4. Load Session** | Restore any previously saved `.json` session file to continue adjusting or reviewing a previous schedule. |
 
 ---
 
@@ -85,15 +81,16 @@ python3 -m http.server 8000
 Shift-Happens/
 ├── index.html                  # Main application UI, modal stages, and controller
 ├── app.js                      # Core scheduling engine, data parsing, optimization algorithms
-├── scheduler-constraints.js    # Feasibility analysis and constraint explanations
-├── scheduler-ui.js             # Reusable schedule-level UI rendering
 ├── style.css                   # Responsive layout, light/dark themes, print media queries
 ├── Shift_Happens_Help.html     # Interactive handbook and operational documentation
 ├── package.json                # Test runner configuration
 ├── tests/
 │   └── scheduler.smoke.test.js # Automated unit and regression test suite
-├── anonymized_mrr_scheduler_input.csv # Consolidated example input
-└── sample_math_practice.csv    # Small, math-themed practice schedule
+└── sample-data/                # Sample input files
+    ├── people.csv
+    ├── teaching.csv
+    ├── mrr.csv
+    └── mrr_scheduler_input.csv
 ```
 
 ---
@@ -118,27 +115,12 @@ npm test
 - ✔️ **Custom Required Courses**: User-selected custom courses enforced across all slots.
 - ✔️ **Natural Numerical Sorting**: Missing core courses and MRR coverage lists sorted naturally.
 - ✔️ **Letter Landscape Print Styles**: Dedicated `@media print` rules for letter landscape with non-clipped names.
-- ✔️ **Duplicate-Name Safety**: Stable IDs keep manual moves from affecting another instructor with the same name.
-- ✔️ **Feasibility Explanations**: Impossible hour totals and uncovered required subjects are reported before scheduling.
-- ✔️ **Repeat File Selection**: The same roster file can be selected again after restarting a session.
 
 ---
 
 ## 📖 Help & Documentation
 
-For a visual step-by-step walkthrough of all features, open [Shift_Happens_Help.html](Shift_Happens_Help.html) in your browser.
-
-### Scheduling behavior and manual overrides
-
-Availability constraints are hard constraints for automatic scheduling. The feasibility check reports when they make an instructor's requested hours impossible. Manual drag-and-drop and swaps may still be confirmed as overrides when staff have negotiated an exception; these overrides remain visible as availability conflicts in the schedule.
-
-Course coverage, room balance, course variety, and back-to-back preferences are optimization goals. The app uses a constraint-aware, most-constrained-first assignment order and then applies the selected priorities. It does not claim to produce a mathematically global optimum.
-
-### Input and session compatibility
-
-The app accepts the consolidated CSV downloaded from the interface, or the three-file people/MRR/teaching workflow. Sessions are saved as JSON and include stable instructor IDs. Older sessions that do not contain IDs can still be opened; they are assigned IDs on import. When old sessions contain duplicate names, re-save the imported session before editing so subsequent actions retain the new identities.
-
-For a quick, low-stakes first run, download [sample_math_practice.csv](sample_math_practice.csv). It contains 16 fictional instructors, a variety of course types and preferences, availability constraints, and MRR staff.
+For a visual step-by-step walkthrough of all features, open **[`Shift_Happens_Help.html`](file:///Users/horsefarm/Downloads/Shift-Happens-main/Shift_Happens_Help.html)** in your browser.
 
 ---
 

@@ -210,50 +210,6 @@ body {
     padding: 24px;
 }
 
-/* Start-session flow */
-.landing-secondary-actions {
-    margin-top: 26px;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.82rem;
-}
-
-.landing-secondary-actions > div {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.setup-controls-hidden { display: none !important; }
-
-.schedule-setup-section {
-    border-top: 1px solid var(--border);
-    margin-top: 28px;
-    padding-top: 28px;
-}
-
-.schedule-setup-heading { margin-bottom: 18px; }
-.schedule-setup-heading h2 { font-size: 1.25rem; margin: 2px 0 4px; }
-.schedule-setup-heading > p:last-child { color: var(--text-muted); font-size: 0.88rem; }
-.review-step-label { color: var(--primary); font-size: 0.75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-
-.review-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 24px;
-    padding-top: 20px;
-}
-
-@media (max-width: 520px) {
-    .review-actions { align-items: stretch; flex-direction: column-reverse; }
-    .review-actions .btn { justify-content: center; }
-}
-
 /* Glass Card */
 .glass-card {
     background: var(--card-bg);
@@ -375,32 +331,31 @@ body {
 
 /* Landing Stage & Option Cards */
 .landing-container {
-    width: min(100%, 900px);
-    margin: clamp(42px, 9vh, 108px) auto 40px;
+    max-width: 980px;
+    margin: 20px auto;
 }
 
 .landing-header {
     text-align: center;
-    margin-bottom: 34px;
+    margin-bottom: 24px;
 }
 
 .landing-header h1 {
-    font-size: clamp(2rem, 4vw, 2.4rem);
+    font-size: 2rem;
     font-weight: 800;
-    letter-spacing: -0.04em;
     color: var(--text);
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 
 .landing-header p {
     color: var(--text-muted);
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .options-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
 }
 
 @media (max-width: 900px) {
@@ -422,32 +377,23 @@ body {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    min-height: 210px;
-    padding: 30px 22px 24px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+    padding: 20px 16px;
 }
 
 .option-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.12);
     border-color: var(--primary);
 }
 
-.option-card-primary {
-    border: 2px solid var(--primary);
-    box-shadow: 0 10px 24px rgba(99, 102, 241, 0.14);
-}
-
 .option-card-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
 }
 
 .option-card-icon i {
@@ -456,26 +402,16 @@ body {
 }
 
 .option-card h3 {
-    margin-bottom: 8px;
-    font-size: 1.12rem;
+    margin-bottom: 6px;
+    font-size: 1.05rem;
     font-weight: 700;
 }
 
 .option-card p {
-    font-size: 0.86rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
     line-height: 1.35;
     flex: 1;
-}
-
-.landing-nav .brand-icon { width: 36px; height: 36px; }
-.landing-nav-context { color: var(--text-muted); font-size: 0.78rem; font-weight: 500; }
-.landing-theme-button { padding: 8px; }
-.landing-theme-button i { width: 18px; height: 18px; }
-
-@media (max-width: 620px) {
-    .landing-nav-context { display: none; }
-    .landing-container { margin-top: 32px; }
 }
 
 
@@ -605,36 +541,6 @@ body {
     position: relative;
     animation: staffPop 0.3s ease-out;
 }
-
-.unassign-button {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 22px;
-    height: 22px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    opacity: 0;
-}
-
-.staff-card:hover .unassign-button,
-.unassign-button:focus-visible {
-    opacity: 1;
-}
-
-.unassign-button:hover {
-    background: rgba(239, 68, 68, 0.12);
-    color: var(--danger);
-}
-
-.unassign-button i { width: 14px; height: 14px; }
 
 .staff-card.active-placement {
     background: var(--primary) !important;
@@ -842,8 +748,6 @@ body {
 .full-view-mode .staff-card strong {
     display: none;
 }
-
-.full-view-mode .unassign-button { display: none; }
 
 /* Optimization Priorities & Strategy Cards */
 .priority-grid {
